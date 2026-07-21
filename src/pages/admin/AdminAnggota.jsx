@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { API_BASE_URL } from '../../config'
-import { Plus, Edit3, Trash2, Eye, X, Users, Upload, CheckCircle, GraduationCap } from 'lucide-react'
+import { Plus, Edit3, Trash2, Eye, X, Users, GraduationCap, Monitor, Smartphone, LayoutGrid } from 'lucide-react'
 
 export default function AdminAnggota() {
   const [anggota, setAnggota] = useState([])
@@ -25,12 +25,18 @@ export default function AdminAnggota() {
   }, [])
 
   const fetchAnggota = async () => {
+    setLoading(true)
     try {
       const res = await fetch(ENDPOINT_ANGGOTA)
       const data = await res.json()
-      setAnggota(Array.isArray(data) ? data : [])
+      // Urutkan berdasarkan nomor urut (1, 2, 3, dst)
+      const sorted = Array.isArray(data) 
+        ? data.sort((a, b) => (Number(a.urutan) || 0) - (Number(b.urutan) || 0)) 
+        : []
+      setAnggota(sorted)
     } catch (err) {
-      console.error(err)
+      console.error('Error fetching anggota:', err)
+      setAnggota([])
     } finally {
       setLoading(false)
     }
@@ -48,7 +54,9 @@ export default function AdminAnggota() {
       })
     } else {
       setEditingId(null)
-      setFormData({ nama: '', nim: '', peran: '', urutan: '', foto: '' })
+      // Otomatis rekomendasikan nomor urut berikutnya
+      const nextUrutan = anggota.length > 0 ? Math.max(...anggota.map(a => Number(a.urutan) || 0)) + 1 : 1
+      setFormData({ nama: '', nim: '', peran: '', urutan: nextUrutan, foto: '' })
     }
     setIsModalOpen(true)
   }
@@ -75,7 +83,7 @@ export default function AdminAnggota() {
         fetchAnggota()
       }
     } catch (err) {
-      console.error(err)
+      console.error('Error saving anggota:', err)
     }
   }
 
@@ -85,7 +93,7 @@ export default function AdminAnggota() {
       const res = await fetch(`${ENDPOINT_ANGGOTA}/${id}`, { method: 'DELETE' })
       if (res.ok) fetchAnggota()
     } catch (err) {
-      console.error(err)
+      console.error('Error deleting anggota:', err)
     }
   }
 
@@ -98,7 +106,7 @@ export default function AdminAnggota() {
             <Users className="text-gold" size={24} />
             <span>Kelola Anggota Kelompok</span>
           </h1>
-          <p className="text-xs text-gray-500">Atur susunan tim, foto, nomor urut, dan peran struktur.</p>
+          <p className="text-xs text-gray-500">Atur susunan tim, foto, nomor urut posisi, dan peran struktur.</p>
         </div>
         <button
           onClick={() => handleOpenForm()}
@@ -109,12 +117,84 @@ export default function AdminAnggota() {
         </button>
       </div>
 
-      {/* TABEL ANGGOTA */}
+      {/* PRATINJAU GRID (DEKSTOP 4 KOLOM, ANDROID 2 KOLOM) */}
+      <div className="bg-gray-50 p-4 sm:p-6 rounded-3xl border border-gold/20 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-200 pb-3">
+          <div className="flex items-center gap-2 text-primary font-bold text-sm">
+            <LayoutGrid size={18} className="text-gold" />
+            <h3>Pratinjau Tata Letak Grid</h3>
+          </div>
+          <div className="flex items-center gap-4 text-[11px] text-gray-500">
+            <span className="flex items-center gap-1">
+              <Monitor size={14} className="text-primary" /> Desktop: <strong>4 Kolom</strong>
+            </span>
+            <span className="flex items-center gap-1">
+              <Smartphone size={14} className="text-primary" /> Android / HP: <strong>2 Kolom</strong>
+            </span>
+          </div>
+        </div>
+
+        {/* INI FORMULA RESPONSIVE-NYA: grid-cols-2 lg:grid-cols-4 */}
+        {loading ? (
+          <div className="text-center py-8 text-xs text-gray-400">Memuat visual formasi...</div>
+        ) : anggota.length === 0 ? (
+          <div className="text-center py-8 text-xs text-gray-400">Belum ada anggota terdaftar. Klik "Tambah Anggota Baru" untuk memulai.</div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            {anggota.map((item) => (
+              <div 
+                key={item.id} 
+                className="bg-white p-3 rounded-2xl border border-gold/30 shadow-xs flex flex-col items-center text-center relative group hover:border-gold transition-all"
+              >
+                {/* Lencana Urutan */}
+                <span className="absolute top-2 left-2 bg-primary text-gold text-[9px] font-bold px-2 py-0.5 rounded-md">
+                  #{item.urutan}
+                </span>
+
+                {/* Foto Profil */}
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden bg-gray-100 border-2 border-gold/20 my-2">
+                  {item.foto ? (
+                    <img src={item.foto} alt={item.nama} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg">
+                      {item.nama?.charAt(0)}
+                    </div>
+                  )}
+                </div>
+
+                <h4 className="font-bold text-primary text-xs sm:text-sm line-clamp-1 w-full">{item.nama}</h4>
+                <p className="text-[10px] text-gold font-semibold truncate w-full">{item.peran}</p>
+                <p className="text-[9px] text-gray-400 mt-0.5">NIM: {item.nim}</p>
+
+                {/* Tombol Aksi Cepat pada Kartu */}
+                <div className="flex items-center gap-1 mt-3 pt-2 border-t border-gray-100 w-full justify-center">
+                  <button
+                    onClick={() => handleOpenForm(item)}
+                    className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors text-[10px] font-bold flex items-center gap-1"
+                    title="Edit Data"
+                  >
+                    <Edit3 size={13} /> Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-[10px] font-bold flex items-center gap-1"
+                    title="Hapus Data"
+                  >
+                    <Trash2 size={13} /> Hapus
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* TABEL DATA ANGGOTA */}
       <div className="overflow-x-auto rounded-2xl border border-gold/20 shadow-sm">
         <table className="w-full text-left text-xs">
           <thead className="bg-primary text-cream font-bold uppercase tracking-wider text-[11px]">
             <tr>
-              <th className="p-3.5 text-center">Urutan</th>
+              <th className="p-3.5 text-center">No. Urut</th>
               <th className="p-3.5">Foto</th>
               <th className="p-3.5">Nama & NIM</th>
               <th className="p-3.5">Peran / Jabatan</th>
@@ -225,13 +305,13 @@ export default function AdminAnggota() {
                   />
                 </div>
                 <div>
-                  <label className="font-bold text-gray-600 block mb-1">Nomor Urut</label>
+                  <label className="font-bold text-gray-600 block mb-1">Nomor Urut Posisi</label>
                   <input
                     type="number"
                     required
                     value={formData.urutan}
                     onChange={(e) => setFormData({ ...formData, urutan: e.target.value })}
-                    placeholder="1"
+                    placeholder="1, 2, 3..."
                     className="w-full p-2.5 border rounded-xl focus:outline-none focus:border-gold"
                   />
                 </div>
@@ -295,7 +375,6 @@ export default function AdminAnggota() {
               Pratinjau Tampilan Publik
             </span>
 
-            {/* KARTU PREVIEW SAMA PERSIS SEPERTI HALAMAN ANGGOTA */}
             <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 border border-gold/30 shadow-md flex flex-col items-center">
               <div className="w-full aspect-[799/1265] max-w-[180px] rounded-xl overflow-hidden border border-gold/30 shadow-md mb-3 bg-primary/10">
                 {previewData.foto ? (
