@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { API_BASE_URL } from '../../config'
 import { Plus, Trash2, Edit2, Loader2 } from 'lucide-react'
 import { DAFTAR_BIDANG } from '../ProgramKerja'
 
@@ -16,11 +17,18 @@ export default function AdminProker() {
     laporan_hasil: ''
   })
 
+  const ENDPOINT_PROKER = `${API_BASE_URL}/program-kerja`
+
   const loadProker = () => {
-    fetch('http://127.0.0.1:8000/api/program-kerja')
+    fetch(ENDPOINT_PROKER)
       .then((res) => res.json())
       .then((data) => {
-        setProker(data)
+        setProker(Array.isArray(data) ? data : [])
+        setLoading(false)
+      })
+      .catch((err) => {
+        console.error('Error fetching program kerja:', err)
+        setProker([])
         setLoading(false)
       })
   }
@@ -53,24 +61,27 @@ export default function AdminProker() {
   const handleSubmit = (e) => {
     e.preventDefault()
     const url = editingId
-      ? `http://127.0.0.1:8000/api/program-kerja/${editingId}`
-      : 'http://127.0.0.1:8000/api/program-kerja'
+      ? `${ENDPOINT_PROKER}/${editingId}`
+      : ENDPOINT_PROKER
     const method = editingId ? 'PUT' : 'POST'
 
     fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData)
-    }).then(() => {
-      setIsModalOpen(false)
-      loadProker()
     })
+      .then(() => {
+        setIsModalOpen(false)
+        loadProker()
+      })
+      .catch((err) => console.error('Error saving program kerja:', err))
   }
 
   const handleDelete = (id) => {
     if (confirm('Yakin ingin menghapus program kerja ini?')) {
-      fetch(`http://127.0.0.1:8000/api/program-kerja/${id}`, { method: 'DELETE' })
+      fetch(`${ENDPOINT_PROKER}/${id}`, { method: 'DELETE' })
         .then(() => loadProker())
+        .catch((err) => console.error('Error deleting program kerja:', err))
     }
   }
 

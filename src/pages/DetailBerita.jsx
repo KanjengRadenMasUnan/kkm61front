@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { API_BASE_URL } from '../config'
 import { 
   Calendar, 
   User, 
@@ -23,13 +24,13 @@ export default function DetailBerita() {
   const [copied, setCopied] = useState(false)
   const [fontSize, setFontSize] = useState('base')
 
-  const API_BASE_URL = `http://${window.location.hostname}:8000/api/berita`
+  const ENDPOINT_BERITA = `${API_BASE_URL}/berita`
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' })
     setLoading(true)
 
-    fetch(`${API_BASE_URL}/${id}`)
+    fetch(`${ENDPOINT_BERITA}/${id}`)
       .then((res) => {
         if (!res.ok) throw new Error('Gagal memuat berita')
         return res.json()
@@ -44,7 +45,7 @@ export default function DetailBerita() {
         setLoading(false)
       })
 
-    fetch(API_BASE_URL)
+    fetch(ENDPOINT_BERITA)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -54,7 +55,7 @@ export default function DetailBerita() {
         }
       })
       .catch((err) => console.error('Error fetching berita terkait:', err))
-  }, [id, API_BASE_URL])
+  }, [id, ENDPOINT_BERITA])
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href)

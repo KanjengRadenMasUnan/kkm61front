@@ -10,6 +10,14 @@ export default function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
 
+  // Proteksi Halaman Admin (Cek status login)
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem('isLoggedIn')
+    if (!isLoggedIn || isLoggedIn !== 'true') {
+      navigate('/admin/login', { replace: true })
+    }
+  }, [navigate])
+
   // Deteksi ukuran layar HP / Tablet / Desktop
   useEffect(() => {
     const handleResize = () => {

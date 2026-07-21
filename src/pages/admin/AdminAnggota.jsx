@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { API_BASE_URL } from '../../config'
 import { Plus, Edit3, Trash2, Eye, X, Users, Upload, CheckCircle, GraduationCap } from 'lucide-react'
 
 export default function AdminAnggota() {
@@ -17,13 +18,15 @@ export default function AdminAnggota() {
     foto: '',
   })
 
+  const ENDPOINT_ANGGOTA = `${API_BASE_URL}/anggota`
+
   useEffect(() => {
     fetchAnggota()
   }, [])
 
   const fetchAnggota = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/anggota')
+      const res = await fetch(ENDPOINT_ANGGOTA)
       const data = await res.json()
       setAnggota(Array.isArray(data) ? data : [])
     } catch (err) {
@@ -53,8 +56,8 @@ export default function AdminAnggota() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     const url = editingId
-      ? `http://127.0.0.1:8000/api/anggota/${editingId}`
-      : 'http://127.0.0.1:8000/api/anggota'
+      ? `${ENDPOINT_ANGGOTA}/${editingId}`
+      : ENDPOINT_ANGGOTA
     const method = editingId ? 'PUT' : 'POST'
 
     try {
@@ -79,7 +82,7 @@ export default function AdminAnggota() {
   const handleDelete = async (id) => {
     if (!window.confirm('Yakin ingin menghapus anggota ini?')) return
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/anggota/${id}`, { method: 'DELETE' })
+      const res = await fetch(`${ENDPOINT_ANGGOTA}/${id}`, { method: 'DELETE' })
       if (res.ok) fetchAnggota()
     } catch (err) {
       console.error(err)

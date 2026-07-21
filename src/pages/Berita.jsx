@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { API_BASE_URL } from '../config'
 import { Calendar, ArrowRight, Flame, Megaphone, TrendingUp, Filter, Layers, Search, ChevronRight } from 'lucide-react'
 import logoKkm from '../assets/logo-kkm.png'
 
@@ -13,8 +14,6 @@ export default function Berita() {
   const [activeCategory, setActiveCategory] = useState('Semua')
   const [search, setSearch] = useState('')
 
-  const API_BASE_URL = `http://${window.location.hostname}:8000/api/berita`
-
   useEffect(() => {
     // Scroll ke atas dengan perilaku smooth/instan
     window.scrollTo({ top: 0, behavior: 'instant' })
@@ -24,8 +23,8 @@ export default function Berita() {
       setLoading(true)
     }
 
-    // Ambil data terbaru di background tanpa merusak UI yang sudah tampil
-    fetch(API_BASE_URL)
+    // Ambil data terbaru di background menggunakan API_BASE_URL dinamis dari config.js
+    fetch(`${API_BASE_URL}/berita`)
       .then((res) => {
         if (!res.ok) throw new Error('Gagal mengambil data dari server')
         return res.json()
@@ -43,7 +42,7 @@ export default function Berita() {
         }
         setLoading(false)
       })
-  }, [API_BASE_URL])
+  }, [])
 
   const listBerita = Array.isArray(berita) ? berita : []
   const beritaUtama = listBerita[0]

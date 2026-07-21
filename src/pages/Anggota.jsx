@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { API_BASE_URL } from '../config'
 import { Loader2, Award, ShieldCheck, Users, Sparkles, GraduationCap } from 'lucide-react'
 
 export default function Anggota() {
@@ -6,13 +7,18 @@ export default function Anggota() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/anggota')
+    // Menggunakan API_BASE_URL dinamis dari config.js
+    fetch(`${API_BASE_URL}/anggota`)
       .then((res) => res.json())
       .then((data) => {
-        setAnggota(data)
+        setAnggota(Array.isArray(data) ? data : [])
         setLoading(false)
       })
-      .catch((err) => console.error(err))
+      .catch((err) => {
+        console.error('Error fetching anggota:', err)
+        setAnggota([])
+        setLoading(false)
+      })
   }, [])
 
   const dpl = anggota.find((a) => Number(a.urutan) === 1)
@@ -150,7 +156,6 @@ export default function Anggota() {
             </div>
 
             <div className="space-y-4 sm:space-y-8">
-              {/* Formasi Grid 2 Kolom di HP, 4 Kolom di PC */}
               {baris1.length > 0 && (
                 <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 max-w-6xl mx-auto">
                   {baris1.map((item) => <CardAnggota key={item.id} item={item} />)}

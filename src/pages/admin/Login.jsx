@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom' // Impor dari react-router-dom
+import { useNavigate } from 'react-router-dom'
+import { API_BASE_URL } from '../../config'
 import { Lock, User, Loader2, LogIn } from 'lucide-react'
 
 export default function Login() {
@@ -9,6 +10,7 @@ export default function Login() {
   const [errorMsg, setErrorMsg] = useState('')
 
   const navigate = useNavigate()
+  const ENDPOINT_LOGIN = `${API_BASE_URL}/login`
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -16,7 +18,7 @@ export default function Login() {
     setErrorMsg('')
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/login', {
+      const response = await fetch(ENDPOINT_LOGIN, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -32,14 +34,14 @@ export default function Login() {
         localStorage.setItem('isLoggedIn', 'true')
         localStorage.setItem('adminUser', JSON.stringify(data.user || { username }))
 
-        // Pindah halaman ke panel admin
-        navigate('/admin/anggota', { replace: true })
+        // Pindah halaman ke dashboard admin
+        navigate('/admin/dashboard', { replace: true })
       } else {
         setErrorMsg(data.message || 'Username atau password salah!')
       }
     } catch (err) {
-      console.error(err)
-      setErrorMsg('Gagal terhubung ke server Laravel. Pastikan backend berjalan.')
+      console.error('Error logging in:', err)
+      setErrorMsg('Gagal terhubung ke server backend. Pastikan koneksi dan API aktif.')
     } finally {
       setLoading(false)
     }

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { API_BASE_URL } from '../../config'
 import { 
   Plus, 
   Edit3, 
@@ -48,7 +49,7 @@ export default function AdminBerita() {
   const [imageFile, setImageFile] = useState(null)
 
   const categories = ['Pendidikan', 'UMKM & Ekonomi', 'Kesehatan', 'Lingkungan', 'Sosial Budaya']
-  const API_BASE_URL = `http://${window.location.hostname}:8000/api/berita`
+  const ENDPOINT_BERITA = `${API_BASE_URL}/berita`
 
   useEffect(() => {
     fetchBerita()
@@ -57,7 +58,7 @@ export default function AdminBerita() {
   const fetchBerita = async () => {
     setLoading(true)
     try {
-      const res = await fetch(API_BASE_URL)
+      const res = await fetch(ENDPOINT_BERITA)
       if (!res.ok) throw new Error('Gagal mengambil data dari server')
       const data = await res.json()
       setBerita(Array.isArray(data) ? data : [])
@@ -226,9 +227,9 @@ export default function AdminBerita() {
       dataToSend.append('gambar', formData.gambar)
     }
 
-    let url = API_BASE_URL
+    let url = ENDPOINT_BERITA
     if (editingId) {
-      url = `${API_BASE_URL}/${editingId}`
+      url = `${ENDPOINT_BERITA}/${editingId}`
       dataToSend.append('_method', 'PUT')
     }
 
@@ -259,7 +260,7 @@ export default function AdminBerita() {
   const handleDelete = async (id) => {
     if (!window.confirm('Yakin ingin menghapus berita ini?')) return
     try {
-      const res = await fetch(`${API_BASE_URL}/${id}`, { method: 'DELETE' })
+      const res = await fetch(`${ENDPOINT_BERITA}/${id}`, { method: 'DELETE' })
       if (res.ok) {
         alert('Berita berhasil dihapus.')
         fetchBerita()

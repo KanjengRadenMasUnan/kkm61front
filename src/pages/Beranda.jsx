@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { API_BASE_URL } from '../config'
 import { 
   Users, 
   Target, 
@@ -22,7 +23,8 @@ export default function Beranda() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/berita')
+    // Menggunakan API_BASE_URL dinamis dari config.js
+    fetch(`${API_BASE_URL}/berita`)
       .then((res) => {
         if (!res.ok) throw new Error('Gagal memuat data berita')
         return res.json()

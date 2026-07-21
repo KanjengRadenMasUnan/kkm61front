@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { API_BASE_URL } from '../../config'
 import { 
   Users, 
   Newspaper, 
@@ -22,12 +23,12 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Simulasi atau Ambil data nyata dari Backend
+    // Ambil data dari Backend menggunakan API_BASE_URL terpusat
     Promise.all([
-      fetch('http://127.0.0.1:8000/api/anggota').then((res) => res.json()).catch(() => []),
-      fetch('http://127.0.0.1:8000/api/berita').then((res) => res.json()).catch(() => []),
-      fetch('http://127.0.0.1:8000/api/kegiatan').then((res) => res.json()).catch(() => []),
-      fetch('http://127.0.0.1:8000/api/program-kerja').then((res) => res.json()).catch(() => []),
+      fetch(`${API_BASE_URL}/anggota`).then((res) => res.json()).catch(() => []),
+      fetch(`${API_BASE_URL}/berita`).then((res) => res.json()).catch(() => []),
+      fetch(`${API_BASE_URL}/kegiatan`).then((res) => res.json()).catch(() => []),
+      fetch(`${API_BASE_URL}/program-kerja`).then((res) => res.json()).catch(() => []),
     ]).then(([resAnggota, resBerita, resKegiatan, resProker]) => {
       setStats({
         anggota: Array.isArray(resAnggota) ? resAnggota.length : 0,

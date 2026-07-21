@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Plus, Trash2, Edit2, Loader2, Calendar, MapPin, Sprout, Brush, BookOpen, Upload } from 'lucide-react'
+import { API_BASE_URL } from '../../config'
+import { Plus, Trash2, Edit2, Loader2, Calendar, MapPin, Sprout, Brush, BookOpen } from 'lucide-react'
 
 const pilihanIkon = [
   { name: 'MapPin', label: 'Lokasi / Survey', Icon: MapPin },
@@ -19,11 +20,18 @@ export default function AdminKegiatan() {
   const [deskripsi, setDeskripsi] = useState('')
   const [ikon, setIkon] = useState('MapPin')
 
+  const ENDPOINT_KEGIATAN = `${API_BASE_URL}/kegiatan`
+
   const loadKegiatan = () => {
-    fetch('http://127.0.0.1:8000/api/kegiatan')
+    fetch(ENDPOINT_KEGIATAN)
       .then((res) => res.json())
       .then((data) => {
-        setKegiatan(data)
+        setKegiatan(Array.isArray(data) ? data : [])
+        setLoading(false)
+      })
+      .catch((err) => {
+        console.error('Error fetching kegiatan:', err)
+        setKegiatan([])
         setLoading(false)
       })
   }
@@ -33,9 +41,9 @@ export default function AdminKegiatan() {
   const handleOpenModal = (data = null) => {
     if (data) {
       setEditingId(data.id)
-      setJudul(data.judul)
-      setTanggal(data.tanggal)
-      setDeskripsi(data.deskripsi)
+      setJudul(data.judul || '')
+      setTanggal(data.tanggal || '')
+      setDeskripsi(data.deskripsi || '')
       setIkon(data.ikon || 'MapPin')
     } else {
       setEditingId(null)
@@ -57,8 +65,8 @@ export default function AdminKegiatan() {
     formData.append('ikon', ikon)
 
     const url = editingId
-      ? `http://127.0.0.1:8000/api/kegiatan/${editingId}`
-      : 'http://127.0.0.1:8000/api/kegiatan'
+      ? `${ENDPOINT_KEGIATAN}/${editingId}`
+      : ENDPOINT_KEGIATAN
 
     if (editingId) {
       formData.append('_method', 'PUT')
@@ -67,16 +75,19 @@ export default function AdminKegiatan() {
     fetch(url, {
       method: 'POST',
       body: formData
-    }).then(() => {
-      setIsModalOpen(false)
-      loadKegiatan()
     })
+      .then(() => {
+        setIsModalOpen(false)
+        loadKegiatan()
+      })
+      .catch((err) => console.error('Error saving kegiatan:', err))
   }
 
   const handleDelete = (id) => {
     if (confirm('Yakin ingin menghapus kegiatan ini?')) {
-      fetch(`http://127.0.0.1:8000/api/kegiatan/${id}`, { method: 'DELETE' })
+      fetch(`${ENDPOINT_KEGIATAN}/${id}`, { method: 'DELETE' })
         .then(() => loadKegiatan())
+        .catch((err) => console.error('Error deleting kegiatan:', err))
     }
   }
 
