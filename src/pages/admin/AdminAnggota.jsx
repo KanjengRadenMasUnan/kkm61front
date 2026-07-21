@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { API_BASE_URL } from '../../config'
-import { Plus, Edit3, Trash2, Eye, X, Users, GraduationCap, Monitor, Smartphone, LayoutGrid } from 'lucide-react'
+import { Plus, Edit3, Trash2, Eye, X, Users, GraduationCap, Monitor, Smartphone, LayoutGrid, Award, ShieldCheck } from 'lucide-react'
 
 export default function AdminAnggota() {
   const [anggota, setAnggota] = useState([])
@@ -42,6 +42,11 @@ export default function AdminAnggota() {
     }
   }
 
+  // Memisahkan data berdasarkan urutan/hirarki
+  const dpl = anggota.find(a => Number(a.urutan) === 1) || anggota[0] // Urutan 1 = DPL
+  const pimpinan = anggota.filter(a => Number(a.urutan) === 2 || Number(a.urutan) === 3) // Urutan 2 & 3 = Ketua & Wakil
+  const anggotaLain = anggota.filter(a => Number(a.urutan) > 3) // Urutan 4 ke atas = Anggota Tim
+
   const handleOpenForm = (item = null) => {
     if (item) {
       setEditingId(item.id)
@@ -54,7 +59,6 @@ export default function AdminAnggota() {
       })
     } else {
       setEditingId(null)
-      // Otomatis rekomendasikan nomor urut berikutnya
       const nextUrutan = anggota.length > 0 ? Math.max(...anggota.map(a => Number(a.urutan) || 0)) + 1 : 1
       setFormData({ nama: '', nim: '', peran: '', urutan: nextUrutan, foto: '' })
     }
@@ -88,7 +92,7 @@ export default function AdminAnggota() {
   }
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Yakin ingin menghapus anggota ini?')) return
+    if (!window.confirm('Yakin ingin menghapus data ini?')) return
     try {
       const res = await fetch(`${ENDPOINT_ANGGOTA}/${id}`, { method: 'DELETE' })
       if (res.ok) fetchAnggota()
@@ -104,9 +108,9 @@ export default function AdminAnggota() {
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-primary flex items-center gap-2">
             <Users className="text-gold" size={24} />
-            <span>Kelola Anggota Kelompok</span>
+            <span>Kelola Anggota & Struktur Kelompok</span>
           </h1>
-          <p className="text-xs text-gray-500">Atur susunan tim, foto, nomor urut posisi, dan peran struktur.</p>
+          <p className="text-xs text-gray-500">Atur susunan DPL (#1), Pimpinan (#2 & #3), serta Anggota Tim (#4+).</p>
         </div>
         <button
           onClick={() => handleOpenForm()}
@@ -117,86 +121,155 @@ export default function AdminAnggota() {
         </button>
       </div>
 
-      {/* PRATINJAU GRID (DEKSTOP 4 KOLOM, ANDROID 2 KOLOM) */}
-      <div className="bg-gray-50 p-4 sm:p-6 rounded-3xl border border-gold/20 space-y-4">
+      {/* PRATINJAU STRUKTUR HIRARKI */}
+      <div className="bg-gray-50 p-4 sm:p-6 rounded-3xl border border-gold/20 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-200 pb-3">
           <div className="flex items-center gap-2 text-primary font-bold text-sm">
             <LayoutGrid size={18} className="text-gold" />
-            <h3>Pratinjau Tata Letak Grid</h3>
+            <h3>Pratinjau Struktur Kelompok</h3>
           </div>
           <div className="flex items-center gap-4 text-[11px] text-gray-500">
             <span className="flex items-center gap-1">
-              <Monitor size={14} className="text-primary" /> Desktop: <strong>4 Kolom</strong>
+              <Monitor size={14} className="text-primary" /> Desktop: <strong>4 Kolom Grid</strong>
             </span>
             <span className="flex items-center gap-1">
-              <Smartphone size={14} className="text-primary" /> Android / HP: <strong>2 Kolom</strong>
+              <Smartphone size={14} className="text-primary" /> HP: <strong>2 Kolom Grid</strong>
             </span>
           </div>
         </div>
 
-        {/* INI FORMULA RESPONSIVE-NYA: grid-cols-2 lg:grid-cols-4 */}
         {loading ? (
-          <div className="text-center py-8 text-xs text-gray-400">Memuat visual formasi...</div>
+          <div className="text-center py-8 text-xs text-gray-400">Memuat struktur kelompok...</div>
         ) : anggota.length === 0 ? (
-          <div className="text-center py-8 text-xs text-gray-400">Belum ada anggota terdaftar. Klik "Tambah Anggota Baru" untuk memulai.</div>
+          <div className="text-center py-8 text-xs text-gray-400">Belum ada data terdaftar. Silakan tambah data anggota.</div>
         ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            {anggota.map((item) => (
-              <div 
-                key={item.id} 
-                className="bg-white p-3 rounded-2xl border border-gold/30 shadow-xs flex flex-col items-center text-center relative group hover:border-gold transition-all"
-              >
-                {/* Lencana Urutan */}
-                <span className="absolute top-2 left-2 bg-primary text-gold text-[9px] font-bold px-2 py-0.5 rounded-md">
-                  #{item.urutan}
+          <div className="space-y-6">
+            
+            {/* TINGKAT 1: DPL (Paling Atas - Ditengah) */}
+            {dpl && (
+              <div className="flex flex-col items-center">
+                <span className="text-[10px] font-bold text-gold uppercase tracking-wider mb-2 flex items-center gap-1">
+                  <Award size={12} /> Dosen Pembimbing Lapangan (Urutan #1)
                 </span>
-
-                {/* Foto Profil */}
-                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden bg-gray-100 border-2 border-gold/20 my-2">
-                  {item.foto ? (
-                    <img src={item.foto} alt={item.nama} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg">
-                      {item.nama?.charAt(0)}
-                    </div>
-                  )}
-                </div>
-
-                <h4 className="font-bold text-primary text-xs sm:text-sm line-clamp-1 w-full">{item.nama}</h4>
-                <p className="text-[10px] text-gold font-semibold truncate w-full">{item.peran}</p>
-                <p className="text-[9px] text-gray-400 mt-0.5">NIM: {item.nim}</p>
-
-                {/* Tombol Aksi Cepat pada Kartu */}
-                <div className="flex items-center gap-1 mt-3 pt-2 border-t border-gray-100 w-full justify-center">
-                  <button
-                    onClick={() => handleOpenForm(item)}
-                    className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors text-[10px] font-bold flex items-center gap-1"
-                    title="Edit Data"
-                  >
-                    <Edit3 size={13} /> Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(item.id)}
-                    className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-[10px] font-bold flex items-center gap-1"
-                    title="Hapus Data"
-                  >
-                    <Trash2 size={13} /> Hapus
-                  </button>
+                <div className="w-full max-w-xs bg-white p-3.5 rounded-2xl border-2 border-gold shadow-md flex flex-col items-center text-center relative">
+                  <span className="absolute top-2 left-2 bg-gold text-primary text-[9px] font-bold px-2 py-0.5 rounded-md">
+                    #{dpl.urutan}
+                  </span>
+                  <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-100 border-2 border-gold my-1">
+                    {dpl.foto ? (
+                      <img src={dpl.foto} alt={dpl.nama} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg">
+                        {dpl.nama?.charAt(0)}
+                      </div>
+                    )}
+                  </div>
+                  <h4 className="font-bold text-primary text-sm">{dpl.nama}</h4>
+                  <p className="text-[10px] text-gold font-bold">{dpl.peran || 'DPL'}</p>
+                  <p className="text-[9px] text-gray-400">NIP/NIDN: {dpl.nim}</p>
+                  
+                  <div className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-100 w-full justify-center">
+                    <button onClick={() => handleOpenForm(dpl)} className="p-1 text-amber-600 text-[10px] font-bold flex items-center gap-1">
+                      <Edit3 size={12} /> Edit
+                    </button>
+                    <button onClick={() => handleDelete(dpl.id)} className="p-1 text-red-600 text-[10px] font-bold flex items-center gap-1">
+                      <Trash2 size={12} /> Hapus
+                    </button>
+                  </div>
                 </div>
               </div>
-            ))}
+            )}
+
+            {/* TINGKAT 2: KETUA & WAKIL KETUA (Baris Kedua) */}
+            {pimpinan.length > 0 && (
+              <div className="flex flex-col items-center border-t border-gray-200 pt-4">
+                <span className="text-[10px] font-bold text-primary uppercase tracking-wider mb-2 flex items-center gap-1">
+                  <ShieldCheck size={12} className="text-gold" /> Pimpinan Kelompok (Urutan #2 & #3)
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-lg">
+                  {pimpinan.map((item) => (
+                    <div key={item.id} className="bg-white p-3 rounded-2xl border border-gold/40 shadow-sm flex flex-col items-center text-center relative">
+                      <span className="absolute top-2 left-2 bg-primary text-gold text-[9px] font-bold px-2 py-0.5 rounded-md">
+                        #{item.urutan}
+                      </span>
+                      <div className="w-14 h-14 rounded-full overflow-hidden bg-gray-100 border-2 border-gold/30 my-1">
+                        {item.foto ? (
+                          <img src={item.foto} alt={item.nama} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full bg-primary/10 text-primary flex items-center justify-center font-bold text-base">
+                            {item.nama?.charAt(0)}
+                          </div>
+                        )}
+                      </div>
+                      <h4 className="font-bold text-primary text-xs truncate w-full">{item.nama}</h4>
+                      <p className="text-[10px] text-gold font-bold truncate w-full">{item.peran}</p>
+                      <p className="text-[9px] text-gray-400">NIM: {item.nim}</p>
+
+                      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-100 w-full justify-center">
+                        <button onClick={() => handleOpenForm(item)} className="p-1 text-amber-600 text-[10px] font-bold flex items-center gap-1">
+                          <Edit3 size={12} /> Edit
+                        </button>
+                        <button onClick={() => handleDelete(item.id)} className="p-1 text-red-600 text-[10px] font-bold flex items-center gap-1">
+                          <Trash2 size={12} /> Hapus
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TINGKAT 3: ANGGOTA LAIN (Baris Ketiga dan Seterusnya - 4 Kolom Desktop / 2 Kolom HP) */}
+            {anggotaLain.length > 0 && (
+              <div className="border-t border-gray-200 pt-4">
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-3 block text-center">
+                  Anggota Tim & Divisi (Urutan #4+)
+                </span>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                  {anggotaLain.map((item) => (
+                    <div key={item.id} className="bg-white p-3 rounded-2xl border border-gray-200 shadow-xs flex flex-col items-center text-center relative">
+                      <span className="absolute top-2 left-2 bg-gray-100 text-gray-600 text-[9px] font-bold px-2 py-0.5 rounded-md">
+                        #{item.urutan}
+                      </span>
+                      <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 border border-gray-200 my-1">
+                        {item.foto ? (
+                          <img src={item.foto} alt={item.nama} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
+                            {item.nama?.charAt(0)}
+                          </div>
+                        )}
+                      </div>
+                      <h4 className="font-bold text-primary text-xs truncate w-full">{item.nama}</h4>
+                      <p className="text-[10px] text-gray-600 font-medium truncate w-full">{item.peran}</p>
+                      <p className="text-[9px] text-gray-400">NIM: {item.nim}</p>
+
+                      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-100 w-full justify-center">
+                        <button onClick={() => handleOpenForm(item)} className="p-1 text-amber-600 text-[10px] font-bold flex items-center gap-1">
+                          <Edit3 size={12} /> Edit
+                        </button>
+                        <button onClick={() => handleDelete(item.id)} className="p-1 text-red-600 text-[10px] font-bold flex items-center gap-1">
+                          <Trash2 size={12} /> Hapus
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
           </div>
         )}
       </div>
 
-      {/* TABEL DATA ANGGOTA */}
+      {/* TABEL LENGKAP DATA ANGGOTA */}
       <div className="overflow-x-auto rounded-2xl border border-gold/20 shadow-sm">
         <table className="w-full text-left text-xs">
           <thead className="bg-primary text-cream font-bold uppercase tracking-wider text-[11px]">
             <tr>
-              <th className="p-3.5 text-center">No. Urut</th>
+              <th className="p-3.5 text-center">Urutan</th>
               <th className="p-3.5">Foto</th>
-              <th className="p-3.5">Nama & NIM</th>
+              <th className="p-3.5">Nama & NIM / NIP</th>
               <th className="p-3.5">Peran / Jabatan</th>
               <th className="p-3.5 text-center">Aksi</th>
             </tr>
@@ -227,7 +300,7 @@ export default function AdminAnggota() {
                   </td>
                   <td className="p-3.5">
                     <div className="font-bold text-primary text-sm">{item.nama}</div>
-                    <div className="text-[11px] text-gray-400">NIM: {item.nim}</div>
+                    <div className="text-[11px] text-gray-400">NIM/NIP: {item.nim}</div>
                   </td>
                   <td className="p-3.5">
                     <span className="bg-gold/10 text-gold border border-gold/30 font-bold px-2.5 py-1 rounded-lg text-[10px]">
@@ -272,7 +345,7 @@ export default function AdminAnggota() {
           <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 border border-gold/30 shadow-2xl">
             <div className="flex justify-between items-center border-b pb-3">
               <h3 className="font-bold text-primary text-base">
-                {editingId ? 'Edit Data Anggota' : 'Tambah Anggota Baru'}
+                {editingId ? 'Edit Data Anggota' : 'Tambah Data Baru'}
               </h3>
               <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
                 <X size={20} />
@@ -281,20 +354,20 @@ export default function AdminAnggota() {
 
             <form onSubmit={handleSubmit} className="space-y-3 text-xs">
               <div>
-                <label className="font-bold text-gray-600 block mb-1">Nama Lengkap</label>
+                <label className="font-bold text-gray-600 block mb-1">Nama Lengkap & Gelar</label>
                 <input
                   type="text"
                   required
                   value={formData.nama}
                   onChange={(e) => setFormData({ ...formData, nama: e.target.value })}
-                  placeholder="Contoh: Budi Santoso"
+                  placeholder="Contoh: Dr. Ahmad, M.Pd / Budi Santoso"
                   className="w-full p-2.5 border rounded-xl focus:outline-none focus:border-gold"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold text-gray-600 block mb-1">NIM</label>
+                  <label className="font-bold text-gray-600 block mb-1">NIM / NIP / NIDN</label>
                   <input
                     type="text"
                     required
@@ -311,7 +384,7 @@ export default function AdminAnggota() {
                     required
                     value={formData.urutan}
                     onChange={(e) => setFormData({ ...formData, urutan: e.target.value })}
-                    placeholder="1, 2, 3..."
+                    placeholder="1: DPL | 2: Ketua | 3: Wakil | 4+: Anggota"
                     className="w-full p-2.5 border rounded-xl focus:outline-none focus:border-gold"
                   />
                 </div>
@@ -324,7 +397,7 @@ export default function AdminAnggota() {
                   required
                   value={formData.peran}
                   onChange={(e) => setFormData({ ...formData, peran: e.target.value })}
-                  placeholder="Ketua / Anggota Divisi Humas"
+                  placeholder="DPL / Ketua Kelompok / Divisi Humas"
                   className="w-full p-2.5 border rounded-xl focus:outline-none focus:border-gold"
                 />
               </div>
@@ -360,7 +433,7 @@ export default function AdminAnggota() {
         </div>
       )}
 
-      {/* MODAL PREVIEW KARTU ANGGOTA */}
+      {/* MODAL PREVIEW KARTU */}
       {previewData && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-cream rounded-3xl max-w-sm w-full p-6 relative border border-gold shadow-2xl space-y-4 text-center">
@@ -372,7 +445,7 @@ export default function AdminAnggota() {
             </button>
 
             <span className="text-[10px] font-bold text-gold uppercase tracking-wider bg-primary px-3 py-1 rounded-full inline-block">
-              Pratinjau Tampilan Publik
+              Pratinjau Kartu
             </span>
 
             <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 border border-gold/30 shadow-md flex flex-col items-center">
@@ -388,7 +461,7 @@ export default function AdminAnggota() {
               <h3 className="font-bold text-primary text-base leading-tight">{previewData.nama}</h3>
               <p className="text-xs text-gray-500 flex items-center gap-1 mt-1">
                 <GraduationCap size={14} className="text-gold" />
-                <span>NIM: {previewData.nim}</span>
+                <span>NIM/NIP: {previewData.nim}</span>
               </p>
               <span className="mt-2 text-xs font-bold bg-gold/20 text-gold px-3 py-1 rounded-full border border-gold/30">
                 {previewData.peran}
