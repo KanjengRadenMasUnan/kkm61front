@@ -18,13 +18,16 @@ import {
   ArrowDown,
   Image as ImageIcon,
   Type,
-  AlignLeft
+  AlignLeft,
+  Loader2
 } from 'lucide-react'
 
 export default function AdminBerita() {
   const [berita, setBerita] = useState([])
   const [loading, setLoading] = useState(true)
   const [submitLoading, setSubmitLoading] = useState(false)
+  const [uploadingBlockId, setUploadingBlockId] = useState(null)
+  const [uploadingCover, setUploadingCover] = useState(false)
 
   // Canvas & Preview State
   const [isCanvasOpen, setIsCanvasOpen] = useState(false)
@@ -51,6 +54,18 @@ export default function AdminBerita() {
   const categories = ['Pendidikan', 'UMKM & Ekonomi', 'Kesehatan', 'Lingkungan', 'Sosial Budaya']
   const ENDPOINT_BERITA = `${API_BASE_URL}/berita`
 
+  // Helper Pembersih URL Gambar
+  const getSecureImageUrl = (url) => {
+    if (!url) return ''
+    if (url.startsWith('blob:')) return url
+    if (url.startsWith('http://')) return url.replace('http://', 'https://')
+    if (url.startsWith('/')) {
+      const backendDomain = API_BASE_URL.replace(/\/api$/, '')
+      return `${backendDomain}${url}`.replace('http://', 'https://')
+    }
+    return url
+  }
+
   useEffect(() => {
     fetchBerita()
   }, [])
@@ -76,17 +91,15 @@ export default function AdminBerita() {
       return [{ id: Date.now(), type: 'paragraph', content: '' }]
     }
 
-    // 1. Coba dekode format JSON Murni (Prioritas Utama)
     try {
       const parsedJSON = JSON.parse(isiText)
       if (Array.isArray(parsedJSON) && parsedJSON.length > 0) {
         return parsedJSON
       }
     } catch (e) {
-      // Jika data lama dalam bentuk teks biasa, gunakan pemisah paragraf
+      // Fallback data teks lama
     }
 
-    // 2. Fallback untuk data lama berbasis teks
     const paragraphs = isiText.split(/\n\n+/)
     const parsedBlocks = []
 
@@ -189,19 +202,49 @@ export default function AdminBerita() {
     setBlocks(newBlocks)
   }
 
+  // UPLOAD COVER DENGAN PRATINJAU SEMENTARA
   const handleFileUpload = (e) => {
     const file = e.target.files[0]
     if (file) {
       setImageFile(file)
+      // Buat URL preview lokal tanpa mengganti nilai gambar jika di-submit nanti
       setFormData({ ...formData, gambar: URL.createObjectURL(file) })
     }
   }
 
-  const handleBlockImageUpload = (id, e) => {
+  // PERBAIKAN UTAMA: UPLOAD GAMBAR SISIPAN BLOK LANGSUNG KE BACKEND
+  const handleBlockImageUpload = async (id, e) => {
     const file = e.target.files[0]
-    if (file) {
-      const url = URL.createObjectURL(file)
-      updateBlock(id, 'url', url)
+    if (!file) return
+
+    setUploadingBlockId(id)
+
+    // Upload sementara ke endpoint khusus backend agar dapat HTTPS Cloudinary asli
+    const payload = new FormData()
+    payload.append('foto', file)
+    payload.append('nama', 'sisipan_berita')
+    payload.append('nim', '000')
+    payload.append('peran', 'sisipan')
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/anggota`, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: payload
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        const uploadedUrl = data.foto
+        updateBlock(id, 'url', uploadedUrl)
+      } else {
+        alert('Gagal mengunggah gambar sisipan ke server.')
+      }
+    } catch (err) {
+      console.error('Error uploading block image:', err)
+      alert('Terjadi kesalahan jaringan saat unggah gambar sisipan.')
+    } finally {
+      setUploadingBlockId(null)
     }
   }
 
@@ -209,6 +252,13 @@ export default function AdminBerita() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSubmitLoading(true)
+
+    // Validasi gambar sisipan tidak boleh ada yang tersisa URL blob:
+    const hasBlobBlock = blocks.some(b => b.type === 'image' && b.url && b.url.startsWith('blob:'))
+    if (hasBlobBlock) {
+      setSubmitLoading(false)
+      return alert('Masih ada gambar sisipan yang belum selesai diunggah ke server. Silakan pilih ulang gambar sisipan Anda.')
+    }
 
     // Simpan susunan blok utuh sebagai JSON string
     const jsonIsi = JSON.stringify(blocks)
@@ -221,6 +271,7 @@ export default function AdminBerita() {
     dataToSend.append('kategori', formData.kategori)
     dataToSend.append('penulis', formData.penulis)
 
+    // PERBAIKAN HAPUS BLOB COVER
     if (imageFile) {
       dataToSend.append('gambar', imageFile)
     } else if (formData.gambar && !formData.gambar.startsWith('blob:')) {
@@ -320,7 +371,7 @@ export default function AdminBerita() {
                   <td className="p-3.5">
                     <div className="w-16 h-12 rounded-xl overflow-hidden bg-gray-100 border border-gold/20">
                       {item.gambar ? (
-                        <img src={item.gambar} alt={item.judul} className="w-full h-full object-cover" />
+                        <img src={getSecureImageUrl(item.gambar)} alt={item.judul} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[10px]">
                           KKM 61
@@ -591,14 +642,19 @@ export default function AdminBerita() {
                                 type="text"
                                 value={block.url || ''}
                                 onChange={(e) => updateBlock(block.id, 'url', e.target.value)}
-                                placeholder="URL Gambar Sisipan..."
+                                placeholder="URL Gambar Sisipan (Otomatis Cloudinary)"
                                 className="w-full p-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gold"
                               />
-                              <label className="bg-gold/20 hover:bg-gold/30 p-2 rounded-xl border border-gold/30 cursor-pointer flex items-center justify-center shrink-0">
-                                <Upload size={14} className="text-primary font-bold" />
+                              <label className="bg-gold/20 hover:bg-gold/30 p-2 rounded-xl border border-gold/30 cursor-pointer flex items-center justify-center shrink-0 min-w-[36px]">
+                                {uploadingBlockId === block.id ? (
+                                  <Loader2 size={14} className="animate-spin text-primary font-bold" />
+                                ) : (
+                                  <Upload size={14} className="text-primary font-bold" />
+                                )}
                                 <input
                                   type="file"
                                   accept="image/*"
+                                  disabled={uploadingBlockId === block.id}
                                   onChange={(e) => handleBlockImageUpload(block.id, e)}
                                   className="hidden"
                                 />
@@ -664,7 +720,7 @@ export default function AdminBerita() {
                   </button>
                   <button
                     type="submit"
-                    disabled={submitLoading}
+                    disabled={submitLoading || uploadingBlockId !== null}
                     className="w-2/3 py-2.5 bg-primary text-gold rounded-xl font-bold hover:bg-[#163359] text-xs shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     <CheckCircle2 size={16} />
@@ -720,7 +776,7 @@ export default function AdminBerita() {
 
                     {formData.gambar ? (
                       <div className="w-full h-48 rounded-2xl overflow-hidden border border-gold/20">
-                        <img src={formData.gambar} alt="Preview Cover" className="w-full h-full object-cover" />
+                        <img src={getSecureImageUrl(formData.gambar)} alt="Preview Cover" className="w-full h-full object-cover" />
                       </div>
                     ) : (
                       <div className="w-full h-36 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-xs">
@@ -769,7 +825,7 @@ export default function AdminBerita() {
                             <div className="space-y-1 my-3 bg-gray-50 p-2 rounded-2xl border border-gray-200">
                               {block.url ? (
                                 <div className="w-full h-40 rounded-xl overflow-hidden">
-                                  <img src={block.url} alt="Sisipan" className="w-full h-full object-cover" />
+                                  <img src={getSecureImageUrl(block.url)} alt="Sisipan" className="w-full h-full object-cover" />
                                 </div>
                               ) : (
                                 <div className="w-full h-28 rounded-xl bg-gray-200 flex items-center justify-center text-gray-400 text-xs">
