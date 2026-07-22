@@ -202,41 +202,73 @@ export default function AdminBerita() {
     setBlocks(newBlocks)
   }
 
-  // UPLOAD COVER DENGAN PRATINJAU SEMENTARA
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      setImageFile(file)
-      // Buat URL preview lokal tanpa mengganti nilai gambar jika di-submit nanti
-      setFormData({ ...formData, gambar: URL.createObjectURL(file) })
-    }
-  }
-
-  // PERBAIKAN UTAMA: UPLOAD GAMBAR SISIPAN BLOK LANGSUNG KE BACKEND
-  const handleBlockImageUpload = async (id, e) => {
+  // UPLOAD COVER LANGSUNG KE CLOUDINARY SAAT FILE DIPILIH
+  const handleFileUpload = async (e) => {
     const file = e.target.files[0]
     if (!file) return
 
-    setUploadingBlockId(id)
+    setUploadingCover(true)
 
-    // Upload sementara ke endpoint khusus backend agar dapat HTTPS Cloudinary asli
     const payload = new FormData()
-    payload.append('foto', file)
-    payload.append('nama', 'sisipan_berita')
-    payload.append('nim', '000')
-    payload.append('peran', 'sisipan')
+    payload.append('gambar', file)
+    payload.append('judul', 'Cover Temp')
+    payload.append('tanggal', new Date().toISOString().split('T')[0])
+    payload.append('ringkasan', 'Temp Cover')
 
     try {
-      const res = await fetch(`${API_BASE_URL}/anggota`, {
+      const res = await fetch(ENDPOINT_BERITA, {
         method: 'POST',
         headers: { 'Accept': 'application/json' },
         body: payload
       })
 
       if (res.ok) {
-        const data = await res.json()
-        const uploadedUrl = data.foto
-        updateBlock(id, 'url', uploadedUrl)
+        const resData = await res.json()
+        const uploadedUrl = resData.data?.gambar || resData.gambar
+        if (uploadedUrl && !uploadedUrl.startsWith('blob:')) {
+          setFormData((prev) => ({ ...prev, gambar: uploadedUrl }))
+          setImageFile(null)
+        }
+      } else {
+        alert('Gagal mengunggah foto cover.')
+      }
+    } catch (err) {
+      console.error('Error uploading cover:', err)
+      alert('Terjadi kesalahan jaringan saat mengunggah foto cover.')
+    } finally {
+      setUploadingCover(false)
+    }
+  }
+
+  // UPLOAD GAMBAR SISIPAN BLOK LANGSUNG KE CLOUDINARY
+  const handleBlockImageUpload = async (id, e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    setUploadingBlockId(id)
+
+    const payload = new FormData()
+    payload.append('gambar', file)
+    payload.append('judul', 'Sisipan Temp')
+    payload.append('tanggal', new Date().toISOString().split('T')[0])
+    payload.append('ringkasan', 'Temp Sisipan')
+
+    try {
+      const res = await fetch(ENDPOINT_BERITA, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: payload
+      })
+
+      if (res.ok) {
+        const resData = await res.json()
+        const uploadedUrl = resData.data?.gambar || resData.gambar
+
+        if (uploadedUrl && !uploadedUrl.startsWith('blob:')) {
+          updateBlock(id, 'url', uploadedUrl)
+        } else {
+          alert('Gagal mendapatkan URL gambar sisipan dari server.')
+        }
       } else {
         alert('Gagal mengunggah gambar sisipan ke server.')
       }
@@ -253,14 +285,13 @@ export default function AdminBerita() {
     e.preventDefault()
     setSubmitLoading(true)
 
-    // Validasi gambar sisipan tidak boleh ada yang tersisa URL blob:
+    // Validasi tidak boleh ada URL blob: tersisa
     const hasBlobBlock = blocks.some(b => b.type === 'image' && b.url && b.url.startsWith('blob:'))
-    if (hasBlobBlock) {
+    if (hasBlobBlock || (formData.gambar && formData.gambar.startsWith('blob:'))) {
       setSubmitLoading(false)
-      return alert('Masih ada gambar sisipan yang belum selesai diunggah ke server. Silakan pilih ulang gambar sisipan Anda.')
+      return alert('Masih ada gambar yang berupa preview temporary (blob). Silakan pilih/upload ulang gambar Anda.')
     }
 
-    // Simpan susunan blok utuh sebagai JSON string
     const jsonIsi = JSON.stringify(blocks)
 
     const dataToSend = new FormData()
@@ -271,7 +302,6 @@ export default function AdminBerita() {
     dataToSend.append('kategori', formData.kategori)
     dataToSend.append('penulis', formData.penulis)
 
-    // PERBAIKAN HAPUS BLOB COVER
     if (imageFile) {
       dataToSend.append('gambar', imageFile)
     } else if (formData.gambar && !formData.gambar.startsWith('blob:')) {
@@ -533,12 +563,16 @@ export default function AdminBerita() {
                           type="text"
                           value={formData.gambar}
                           onChange={(e) => setFormData({ ...formData, gambar: e.target.value })}
-                          placeholder="URL Gambar / File"
+                          placeholder="URL Cloudinary Otomatis..."
                           className="w-full p-2.5 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gold bg-white"
                         />
-                        <label className="bg-gold/20 hover:bg-gold/30 p-2.5 rounded-xl border border-gold/30 cursor-pointer flex items-center justify-center shrink-0">
-                          <Upload size={14} className="text-primary font-bold" />
-                          <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+                        <label className="bg-gold/20 hover:bg-gold/30 p-2.5 rounded-xl border border-gold/30 cursor-pointer flex items-center justify-center shrink-0 min-w-[36px]">
+                          {uploadingCover ? (
+                            <Loader2 size={14} className="animate-spin text-primary font-bold" />
+                          ) : (
+                            <Upload size={14} className="text-primary font-bold" />
+                          )}
+                          <input type="file" accept="image/*" disabled={uploadingCover} onChange={handleFileUpload} className="hidden" />
                         </label>
                       </div>
                     </div>
@@ -642,8 +676,8 @@ export default function AdminBerita() {
                                 type="text"
                                 value={block.url || ''}
                                 onChange={(e) => updateBlock(block.id, 'url', e.target.value)}
-                                placeholder="URL Gambar Sisipan (Otomatis Cloudinary)"
-                                className="w-full p-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gold"
+                                placeholder="URL Cloudinary Gambar Sisipan..."
+                                className="w-full p-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gold bg-white"
                               />
                               <label className="bg-gold/20 hover:bg-gold/30 p-2 rounded-xl border border-gold/30 cursor-pointer flex items-center justify-center shrink-0 min-w-[36px]">
                                 {uploadingBlockId === block.id ? (
@@ -720,7 +754,7 @@ export default function AdminBerita() {
                   </button>
                   <button
                     type="submit"
-                    disabled={submitLoading || uploadingBlockId !== null}
+                    disabled={submitLoading || uploadingBlockId !== null || uploadingCover}
                     className="w-2/3 py-2.5 bg-primary text-gold rounded-xl font-bold hover:bg-[#163359] text-xs shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     <CheckCircle2 size={16} />
