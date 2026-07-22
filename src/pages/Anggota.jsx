@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react'
 import { API_BASE_URL } from '../config'
-import { Loader2, Award, ShieldCheck, Users, Sparkles, GraduationCap } from 'lucide-react'
+import { Loader2, Award, ShieldCheck, Users, Sparkles, GraduationCap, UserCheck, HeartHandshake } from 'lucide-react'
 
 export default function Anggota() {
   const [anggota, setAnggota] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Menggunakan API_BASE_URL dinamis dari config.js
     fetch(`${API_BASE_URL}/anggota`)
       .then((res) => res.json())
       .then((data) => {
@@ -23,35 +22,33 @@ export default function Anggota() {
 
   const dpl = anggota.find((a) => Number(a.urutan) === 1)
   const ketuaWakil = anggota.filter((a) => Number(a.urutan) === 2 || Number(a.urutan) === 3)
-  
   const anggotaBiasa = anggota
     .filter((a) => Number(a.urutan) >= 4)
-    .sort((a, b) => a.urutan - b.urutan)
-
-  const baris1 = anggotaBiasa.slice(0, 4)
-  const baris2 = anggotaBiasa.slice(4, 8)
-  const baris3 = anggotaBiasa.slice(8, 11)
-  const baris4 = anggotaBiasa.slice(11, 14)
-  const baris5 = anggotaBiasa.slice(14, 16)
+    .sort((a, b) => (Number(a.urutan) || 0) - (Number(b.urutan) || 0))
 
   const CardAnggota = ({ item, isLeader = false, isDpl = false }) => (
-    <div className={`group relative bg-white/80 backdrop-blur-md rounded-2xl sm:rounded-3xl border transition-all duration-500 overflow-hidden flex flex-col items-center p-3 sm:p-4 text-center shadow-sm hover:shadow-2xl hover:-translate-y-1 ${
+    <div className={`group relative bg-white/95 backdrop-blur-md rounded-2xl sm:rounded-3xl border transition-all duration-300 overflow-hidden flex flex-col items-center p-4 sm:p-5 text-center shadow-md hover:shadow-2xl hover:-translate-y-1.5 ${
       isDpl 
-        ? 'border-gold shadow-gold/10 ring-1 ring-gold/30' 
+        ? 'border-gold shadow-gold/20 ring-2 ring-gold/40' 
         : isLeader 
-        ? 'border-primary/30 hover:border-gold' 
+        ? 'border-primary/40 ring-1 ring-primary/20 hover:border-gold' 
         : 'border-gold/20 hover:border-gold/60'
     }`}>
-      <div className="absolute top-2.5 left-2.5 z-10 flex items-center gap-1 bg-primary text-gold text-[9px] sm:text-[10px] font-semibold px-2 py-0.5 rounded-full border border-gold/30 shadow-md">
+      {/* Background Accent Lines inside Card */}
+      <div className="absolute -top-12 -right-12 w-24 h-24 bg-gold/10 rounded-full blur-xl pointer-events-none group-hover:bg-gold/20 transition-colors" />
+
+      {/* Badge Nomor Posisi */}
+      <div className="absolute top-3 left-3 z-10 flex items-center gap-1 bg-primary text-gold text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-gold/40 shadow-md">
         <span>#{item?.urutan}</span>
       </div>
 
-      <div className="w-full max-w-[240px] aspect-[799/1265] rounded-xl sm:rounded-2xl overflow-hidden bg-gradient-to-b from-primary/5 to-gold/10 border border-gold/20 relative shadow-md group-hover:shadow-lg transition-all duration-300">
+      {/* Frame Foto Profile */}
+      <div className="w-full aspect-[3/4] rounded-xl sm:rounded-2xl overflow-hidden bg-gradient-to-b from-primary/10 via-gold/5 to-primary/10 border border-gold/30 relative shadow-inner group-hover:shadow-lg transition-all duration-300">
         {item?.foto ? (
           <img
             src={item.foto}
             alt={item.nama}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
             onError={(e) => {
               e.target.style.display = 'none'
               e.target.nextSibling.style.display = 'flex'
@@ -60,29 +57,30 @@ export default function Anggota() {
         ) : null}
         
         <div
-          className="w-full h-full bg-gradient-to-br from-primary via-[#163359] to-primary flex flex-col items-center justify-center text-gold font-body font-semibold text-3xl sm:text-5xl"
+          className="w-full h-full bg-gradient-to-br from-primary via-[#163359] to-primary flex flex-col items-center justify-center text-gold font-bold text-3xl sm:text-5xl"
           style={{ display: item?.foto ? 'none' : 'flex' }}
         >
           {item?.nama ? item.nama.charAt(0) : 'A'}
         </div>
       </div>
 
-      <div className="mt-3 space-y-1 w-full">
-        <h3 className={`font-body font-bold text-primary group-hover:text-gold transition-colors leading-tight line-clamp-1 ${
-          isDpl ? 'text-base sm:text-xl' : isLeader ? 'text-sm sm:text-lg' : 'text-xs sm:text-base'
+      {/* Detail Informasi */}
+      <div className="mt-4 space-y-1.5 w-full relative z-10">
+        <h3 className={`font-bold text-primary group-hover:text-gold transition-colors leading-tight line-clamp-1 ${
+          isDpl ? 'text-base sm:text-lg' : isLeader ? 'text-sm sm:text-base' : 'text-xs sm:text-sm'
         }`}>
           {item?.nama}
         </h3>
         
-        <p className="text-[10px] sm:text-xs text-ink/60 font-body flex items-center justify-center gap-1">
-          <GraduationCap size={12} className="text-gold shrink-0" />
+        <p className="text-[11px] sm:text-xs text-gray-500 flex items-center justify-center gap-1">
+          <GraduationCap size={13} className="text-gold shrink-0" />
           <span>{item?.nim}</span>
         </p>
 
-        <div className="pt-1.5">
-          <span className={`inline-block px-2.5 py-0.5 sm:px-3.5 sm:py-1 text-[10px] sm:text-xs font-semibold rounded-full font-body border shadow-sm ${
+        <div className="pt-2">
+          <span className={`inline-block px-3.5 py-1 text-[10px] sm:text-xs font-bold rounded-full border shadow-xs ${
             isDpl 
-              ? 'bg-gold text-primary font-bold border-gold' 
+              ? 'bg-gold text-primary border-gold shadow-gold/20' 
               : isLeader 
               ? 'bg-primary text-gold border-gold/30' 
               : 'bg-gold/10 text-gold border-gold/30'
@@ -95,50 +93,77 @@ export default function Anggota() {
   )
 
   return (
-    <div className="animate-fade-in-up space-y-8 sm:space-y-12 pb-12">
+    <div className="animate-fade-in space-y-10 sm:space-y-14 pb-16 max-w-7xl mx-auto px-2 sm:px-4 font-body">
       
-      <div className="text-center max-w-2xl mx-auto space-y-2 pt-2 sm:pt-4">
-        <div className="inline-flex items-center gap-1.5 bg-gold/10 text-gold px-3 py-1 rounded-full border border-gold/20 text-[11px] sm:text-xs font-semibold font-body">
-          <Sparkles size={13} />
-          <span>STRUKTUR ORGANISASI</span>
+      {/* HEADER HERO SECTION DENGAN CARD RINGKASAN */}
+      <div className="relative bg-gradient-to-b from-white/90 to-cream/80 backdrop-blur-md rounded-3xl p-6 sm:p-10 border border-gold/30 shadow-md text-center space-y-6 overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gold/10 rounded-full blur-3xl -z-10" />
+        
+        <div className="inline-flex items-center gap-2 bg-gold/15 text-gold px-4 py-1.5 rounded-full border border-gold/30 text-xs font-bold tracking-wider uppercase shadow-xs">
+          <Sparkles size={14} />
+          <span>Struktur Organisasi Tim</span>
         </div>
-        <h1 className="text-2xl sm:text-4xl font-body font-bold text-primary">
-          Tim Pengabdian KKM 61
-        </h1>
-        <p className="text-ink/70 font-body text-xs sm:text-sm leading-relaxed max-w-md mx-auto">
-          Sinergi mahasiswa Universitas Bina Bangsa dalam pengabdian masyarakat desa.
-        </p>
+
+        <div className="max-w-2xl mx-auto space-y-2">
+          <h1 className="text-3xl sm:text-5xl font-bold text-primary tracking-tight">
+            Tim Pengabdian KKM 61
+          </h1>
+          <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
+            Sinergi dan kolaborasi mahasiswa Universitas Bina Bangsa dalam pengabdian masyarakat desa.
+          </p>
+        </div>
+
+        {/* RINGKASAN STATISTIK */}
+        {!loading && anggota.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 max-w-xl mx-auto pt-2">
+            <div className="bg-white/80 p-3 rounded-2xl border border-gold/20 shadow-xs flex flex-col items-center">
+              <UserCheck size={18} className="text-gold mb-1" />
+              <span className="text-lg font-bold text-primary">{anggota.length}</span>
+              <span className="text-[10px] text-gray-500 font-medium">Total Anggota</span>
+            </div>
+            <div className="bg-white/80 p-3 rounded-2xl border border-gold/20 shadow-xs flex flex-col items-center">
+              <Award size={18} className="text-gold mb-1" />
+              <span className="text-lg font-bold text-primary">{dpl ? 1 : 0}</span>
+              <span className="text-[10px] text-gray-500 font-medium">DPL</span>
+            </div>
+            <div className="bg-white/80 p-3 rounded-2xl border border-gold/20 shadow-xs flex flex-col items-center col-span-2 sm:col-span-1">
+              <HeartHandshake size={18} className="text-gold mb-1" />
+              <span className="text-lg font-bold text-primary">{anggotaBiasa.length}</span>
+              <span className="text-[10px] text-gray-500 font-medium">Anggota Divisi</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-16 text-gold">
-          <Loader2 className="w-8 h-8 animate-spin mb-2" />
-          <p className="font-body font-medium text-xs sm:text-sm text-primary">Memuat struktur anggota...</p>
+        <div className="flex flex-col items-center justify-center py-20 text-gold bg-white/50 rounded-3xl border border-dashed border-gold/30">
+          <Loader2 className="w-9 h-9 animate-spin mb-3 text-gold" />
+          <p className="font-semibold text-xs sm:text-sm text-primary">Memuat struktur tim...</p>
         </div>
       ) : (
-        <div className="space-y-10 sm:space-y-16">
+        <div className="space-y-12 sm:space-y-16">
 
           {/* DPL */}
           {dpl && (
             <div className="space-y-4">
-              <div className="flex items-center justify-center gap-1.5 text-gold font-body font-bold text-[10px] sm:text-xs uppercase tracking-widest bg-gold/10 px-3 py-1 rounded-full w-max mx-auto border border-gold/20">
-                <Award size={14} />
+              <div className="flex items-center justify-center gap-2 text-gold font-bold text-xs uppercase tracking-widest bg-gold/15 px-4 py-1.5 rounded-full w-max mx-auto border border-gold/30 shadow-xs">
+                <Award size={16} />
                 <span>Dosen Pembimbing Lapangan</span>
               </div>
-              <div className="max-w-[200px] sm:max-w-[280px] mx-auto">
+              <div className="max-w-[240px] sm:max-w-[280px] mx-auto">
                 <CardAnggota item={dpl} isLeader={true} isDpl={true} />
               </div>
             </div>
           )}
 
-          {/* KETUA & WAKIL */}
+          {/* KETUA & WAKIL KETUA */}
           {ketuaWakil.length > 0 && (
             <div className="space-y-4">
-              <div className="flex items-center justify-center gap-1.5 text-gold font-body font-bold text-[10px] sm:text-xs uppercase tracking-widest bg-gold/10 px-3 py-1 rounded-full w-max mx-auto border border-gold/20">
-                <ShieldCheck size={14} />
+              <div className="flex items-center justify-center gap-2 text-gold font-bold text-xs uppercase tracking-widest bg-gold/15 px-4 py-1.5 rounded-full w-max mx-auto border border-gold/30 shadow-xs">
+                <ShieldCheck size={16} />
                 <span>Pimpinan Kelompok</span>
               </div>
-              <div className="grid grid-cols-2 sm:flex sm:justify-center gap-3 sm:gap-8 max-w-2xl mx-auto">
+              <div className="grid grid-cols-2 sm:flex sm:justify-center gap-4 sm:gap-8 max-w-2xl mx-auto">
                 {ketuaWakil.map((pimpinan) => (
                   <div key={pimpinan.id} className="w-full sm:w-[260px]">
                     <CardAnggota item={pimpinan} isLeader={true} />
@@ -148,57 +173,22 @@ export default function Anggota() {
             </div>
           )}
 
-          {/* ANGGOTA BIASA */}
-          <div className="space-y-6 sm:space-y-10 pt-6 sm:pt-10 border-t border-gold/20">
-            <div className="flex items-center justify-center gap-1.5 text-gold font-body font-bold text-[10px] sm:text-xs uppercase tracking-widest bg-gold/10 px-3 py-1 rounded-full w-max mx-auto border border-gold/20">
-              <Users size={14} />
-              <span>Anggota Tim Pengabdian</span>
+          {/* ANGGOTA TIM & DIVISI */}
+          {anggotaBiasa.length > 0 && (
+            <div className="space-y-6 pt-8 border-t border-gold/20">
+              <div className="flex items-center justify-center gap-2 text-gold font-bold text-xs uppercase tracking-widest bg-gold/15 px-4 py-1.5 rounded-full w-max mx-auto border border-gold/30 shadow-xs">
+                <Users size={16} />
+                <span>Anggota Tim Pengabdian</span>
+              </div>
+
+              {/* GRID 4 KOLOM RESPONSIVE */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                {anggotaBiasa.map((item) => (
+                  <CardAnggota key={item.id} item={item} />
+                ))}
+              </div>
             </div>
-
-            <div className="space-y-4 sm:space-y-8">
-              {baris1.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 max-w-6xl mx-auto">
-                  {baris1.map((item) => <CardAnggota key={item.id} item={item} />)}
-                </div>
-              )}
-
-              {baris2.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 max-w-6xl mx-auto">
-                  {baris2.map((item) => <CardAnggota key={item.id} item={item} />)}
-                </div>
-              )}
-
-              {baris3.length > 0 && (
-                <div className="grid grid-cols-2 sm:flex sm:justify-center gap-3 sm:gap-6 max-w-5xl mx-auto">
-                  {baris3.map((item) => (
-                    <div key={item.id} className="w-full sm:w-[250px]">
-                      <CardAnggota item={item} />
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {baris4.length > 0 && (
-                <div className="grid grid-cols-2 sm:flex sm:justify-center gap-3 sm:gap-6 max-w-5xl mx-auto">
-                  {baris4.map((item) => (
-                    <div key={item.id} className="w-full sm:w-[250px]">
-                      <CardAnggota item={item} />
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {baris5.length > 0 && (
-                <div className="grid grid-cols-2 sm:flex sm:justify-center gap-3 sm:gap-6 max-w-3xl mx-auto">
-                  {baris5.map((item) => (
-                    <div key={item.id} className="w-full sm:w-[250px]">
-                      <CardAnggota item={item} />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+          )}
 
         </div>
       )}

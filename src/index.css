@@ -12,9 +12,9 @@
   --font-body: 'Plus Jakarta Sans', sans-serif;
 }
 
-/* Memaksa seluruh elemen menggunakan Plus Jakarta Sans */
-*, ::before, ::after {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+/* Memaksa seluruh elemen dan heading menggunakan Plus Jakarta Sans secara konsisten */
+*, ::before, ::after, h1, h2, h3, h4, h5, h6 {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
 }
 
 body {
@@ -25,8 +25,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Khusus judul menggunakan Playfair Display */
-h1, h2, h3, h4, .font-display {
+/* Khusus jika ingin judul bernuansa serif secara eksplisit pada komponen tertentu */
+.font-display {
   font-family: 'Playfair Display', serif !important;
   font-weight: 700;
 }

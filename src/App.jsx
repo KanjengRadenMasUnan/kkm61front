@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 
 // Components
@@ -23,6 +24,17 @@ import AdminBerita from './pages/admin/AdminBerita'
 import AdminKegiatan from './pages/admin/AdminKegiatan'
 import AdminProker from './pages/admin/AdminProker'
 
+// Helper agar posisi scroll otomatis di paling atas setiap kali pindah halaman
+function ScrollToTop() {
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+
+  return null
+}
+
 const ProtectedRoute = ({ children }) => {
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true'
   return isLoggedIn ? children : <Navigate to="/admin/login" replace />
@@ -33,7 +45,7 @@ function AppContent() {
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith('/admin')
 
-  // Layout Khusus Admin (Full Screen 100% Tanpa Container/Padding & Tanpa Navbar/Footer Publik)
+  // Layout Khusus Admin
   if (isAdminRoute) {
     return (
       <main className="w-full min-h-screen bg-white">
@@ -62,7 +74,7 @@ function AppContent() {
     )
   }
 
-  // Layout Publik (Dengan Navbar, Footer, Floating Widget, & Container Rapi)
+  // Layout Publik
   return (
     <div className="min-h-screen flex flex-col justify-between relative bg-cream font-body overflow-x-hidden">
       <Navbar />
@@ -90,6 +102,7 @@ function AppContent() {
 export default function App() {
   return (
     <Router>
+      <ScrollToTop />
       <AppContent />
     </Router>
   )

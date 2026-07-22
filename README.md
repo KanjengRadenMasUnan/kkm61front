@@ -22,6 +22,8 @@ web-kkm
 │  │  ├─ Footer.jsx
 │  │  ├─ Logo.jsx
 │  │  └─ Navbar.jsx
+│  ├─ config.js
+│  ├─ config.js(online
 │  ├─ index.css
 │  ├─ layouts
 │  │  └─ AdminLayout.jsx
