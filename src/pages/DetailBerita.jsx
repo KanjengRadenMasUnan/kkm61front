@@ -26,6 +26,33 @@ export default function DetailBerita() {
 
   const ENDPOINT_BERITA = `${API_BASE_URL}/berita`
 
+  // ===================================================
+  // HELPER PEMBERSIH URL GAMBAR (UNTUK SERVER, HP, & LOKAL)
+  // ===================================================
+  const getSecureImageUrl = (url) => {
+    if (!url) return ''
+
+    // 1. Jika tersimpan URL localhost/127.0.0.1 dari data lama
+    if (url.includes('localhost:8000') || url.includes('127.0.0.1:8000')) {
+      const cleanPath = url.replace(/^https?:\/\/[^\/]+/, '')
+      const backendDomain = API_BASE_URL.replace(/\/api$/, '')
+      return `${backendDomain}${cleanPath}`.replace('http://', 'https://')
+    }
+
+    // 2. Paksa HTTP menjadi HTTPS (Atasi Mixed Content di HP)
+    if (url.startsWith('http://')) {
+      return url.replace('http://', 'https://')
+    }
+
+    // 3. Jika path bersifat relatif (contoh: /storage/uploads/...)
+    if (url.startsWith('/')) {
+      const backendDomain = API_BASE_URL.replace(/\/api$/, '')
+      return `${backendDomain}${url}`.replace('http://', 'https://')
+    }
+
+    return url
+  }
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' })
     setLoading(true)
@@ -81,14 +108,12 @@ export default function DetailBerita() {
 
     let blocks = null
 
-    // Coba dekode sebagai JSON Array Blok
     try {
       const parsed = JSON.parse(isiContent)
       if (Array.isArray(parsed)) {
         blocks = parsed
       }
     } catch (e) {
-      // Jika gagal decode, berarti data teks mentah biasa
       blocks = null
     }
 
@@ -124,7 +149,7 @@ export default function DetailBerita() {
             <figure key={block.id || index} className="my-6 space-y-2">
               {block.url ? (
                 <div className="w-full h-64 sm:h-96 rounded-2xl overflow-hidden border border-gold/20 shadow-sm bg-gray-100">
-                  <img src={block.url} alt={block.caption || 'Gambar Sisipan'} className="w-full h-full object-cover" />
+                  <img src={getSecureImageUrl(block.url)} alt={block.caption || 'Gambar Sisipan'} className="w-full h-full object-cover" />
                 </div>
               ) : null}
               {block.caption && (
@@ -140,7 +165,7 @@ export default function DetailBerita() {
       })
     }
 
-    // B. Fallback jika data merupakan teks biasa (data berita lama)
+    // B. Fallback jika data merupakan teks biasa
     return (
       <div className="whitespace-pre-line leading-relaxed text-ink/90">
         {isiContent}
@@ -275,7 +300,7 @@ export default function DetailBerita() {
       {berita.gambar && (
         <div className="space-y-2 max-w-5xl">
           <div className="w-full h-[260px] sm:h-[480px] rounded-3xl overflow-hidden border border-gold/30 shadow-lg relative bg-primary/10">
-            <img src={berita.gambar} alt={berita.judul} className="w-full h-full object-cover" />
+            <img src={getSecureImageUrl(berita.gambar)} alt={berita.judul} className="w-full h-full object-cover" />
           </div>
           <p className="text-[11px] sm:text-xs text-gray-500 italic text-center">
             Dokumentasi Liputan: {berita.judul}
@@ -328,7 +353,7 @@ export default function DetailBerita() {
                 >
                   <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-gold/20 bg-primary/10">
                     {item.gambar ? (
-                      <img src={item.gambar} alt={item.judul} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                      <img src={getSecureImageUrl(item.gambar)} alt={item.judul} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-primary font-bold text-xs">
                         KKM
@@ -348,7 +373,7 @@ export default function DetailBerita() {
             </div>
           </div>
 
-          {/* BERITA LAINNYA DI WEBSITE (DAFTAR KOTAK VERTIKAL) */}
+          {/* BERITA LAINNYA DI WEBSITE */}
           <div className="bg-white p-5 sm:p-6 rounded-3xl border border-gold/20 shadow-sm space-y-4">
             <div className="flex items-center justify-between border-b border-gold/20 pb-3 text-primary font-bold text-sm sm:text-base">
               <div className="flex items-center gap-2">
@@ -372,7 +397,7 @@ export default function DetailBerita() {
                   >
                     <div className="w-20 h-16 rounded-xl overflow-hidden shrink-0 border border-gray-200 bg-white">
                       {item.gambar ? (
-                        <img src={item.gambar} alt={item.judul} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                        <img src={getSecureImageUrl(item.gambar)} alt={item.judul} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-primary font-bold text-[10px]">
                           KKM 61
