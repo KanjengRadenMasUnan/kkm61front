@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import { API_BASE_URL } from '../config'
 import { 
   Users, 
@@ -12,7 +13,6 @@ import {
   BookOpen,
   HeartPulse,
   Store,
-  Trees,
   Building2
 } from 'lucide-react'
 import logoKkm from '../assets/logo-kkm.png'
@@ -23,7 +23,6 @@ export default function Beranda() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Menggunakan API_BASE_URL dinamis dari config.js
     fetch(`${API_BASE_URL}/berita`)
       .then((res) => {
         if (!res.ok) throw new Error('Gagal memuat data berita')
@@ -36,7 +35,7 @@ export default function Beranda() {
       })
       .catch((err) => {
         console.error(err)
-        setBeritaHighlight([]) // Mencegah crash jika API 500
+        setBeritaHighlight([])
         setLoading(false)
       })
   }, [])
@@ -62,6 +61,23 @@ export default function Beranda() {
   return (
     <div className="space-y-10 sm:space-y-14 font-body pb-6 animate-fade-in-up max-w-7xl mx-auto">
       
+      {/* PENGATURAN META DESCRIPTION & SNIPPET TEXT UNTUK HALAMAN BERANDA */}
+      <Helmet>
+        <title>KKM 61 Waringinkurung News - Portal Berita & Pengabdian Desa Waringinkurung Serang</title>
+        <meta 
+          name="description" 
+          content="Portal liputan berita terkini kegiatan masyarakat, UMKM, pendidikan, kesehatan, dan pengabdian mahasiswa KKM Kelompok 61 Universitas Bina Bangsa (UNIBA) di Desa Waringinkurung, Kecamatan Waringinkurung, Kabupaten Serang, Banten." 
+        />
+        <meta name="keywords" content="KKM 61, Waringinkurung, UNIBA 2026, Universitas Bina Bangsa, Berita Desa Waringinkurung, Pengabdian Masyarakat, Kabupaten Serang" />
+        <link rel="canonical" href="https://kkm61waringinkurungnews.my.id/" />
+        
+        {/* OpenGraph untuk preview link WhatsApp / FB */}
+        <meta property="og:title" content="KKM 61 Waringinkurung News - Portal Berita Resmi Desa Waringinkurung Serang" />
+        <meta property="og:description" content="Kabar liputan pengabdian masyarakat, UMKM, dan kegiatan warga Desa Waringinkurung, Kecamatan Waringinkurung, Kabupaten Serang oleh KKM 61 UNIBA 2026." />
+        <meta property="og:url" content="https://kkm61waringinkurungnews.my.id/" />
+        <meta property="og:image" content="https://kkm61waringinkurungnews.my.id/logo-kkm.png" />
+      </Helmet>
+
       {/* HERO SECTION */}
       <section className="bg-gradient-to-br from-primary via-[#163359] to-primary text-cream p-6 sm:p-12 rounded-3xl border border-gold/30 shadow-xl relative overflow-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
@@ -100,7 +116,7 @@ export default function Beranda() {
 
           <div className="lg:col-span-4 flex justify-center">
             <div className="w-40 h-40 sm:w-56 sm:h-56 bg-white/10 rounded-3xl p-4 sm:p-6 border border-gold/30 backdrop-blur-md shadow-2xl flex items-center justify-center">
-              <img src={logoKkm} alt="Logo KKM 61" className="w-full h-full object-contain drop-shadow-md" />
+              <img src={logoKkm} alt="Logo KKM 61 Waringinkurung" className="w-full h-full object-contain drop-shadow-md" />
             </div>
           </div>
         </div>
@@ -198,7 +214,7 @@ export default function Beranda() {
         )}
       </section>
 
-      {/* PILAR PENGABDIAN (5 PILAR UTAMA) */}
+      {/* PILAR PENGABDIAN */}
       <section className="space-y-4">
         <div className="text-center space-y-1">
           <h2 className="font-bold text-lg sm:text-2xl text-primary">5 Pilar Utama Pengabdian</h2>

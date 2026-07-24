@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import { API_BASE_URL } from '../config'
 import { 
   Calendar, 
@@ -104,7 +105,7 @@ export default function DetailBerita() {
     return `${time} min baca`
   }
 
-  // FUNGSI UTAMA: MENGERJAKAN DEKODE BLOK JSON MENJADI ELEMEN HTML
+  // FUNGSI UTAMA: MENGERJAKAN DEKODE BLOK JSON MENJADI ELEMEN HTML (ALT TEXT DINAMIS)
   const renderKontenBerita = (isiContent) => {
     if (!isiContent) return <p className="text-gray-400 italic">Tidak ada isi berita.</p>
 
@@ -150,7 +151,11 @@ export default function DetailBerita() {
             <figure key={block.id || index} className="my-6 space-y-2">
               {block.url ? (
                 <div className="w-full h-64 sm:h-96 rounded-2xl overflow-hidden border border-gold/20 shadow-sm bg-gray-100">
-                  <img src={getSecureImageUrl(block.url)} alt={block.caption || 'Gambar Sisipan'} className="w-full h-full object-cover" />
+                  <img 
+                    src={getSecureImageUrl(block.url)} 
+                    alt={block.caption ? `${block.caption} - ${berita.judul} Waringinkurung Serang` : `Dokumentasi ${berita.judul} - KKM 61 Waringinkurung`} 
+                    className="w-full h-full object-cover" 
+                  />
                 </div>
               ) : null}
               {block.caption && (
@@ -185,6 +190,10 @@ export default function DetailBerita() {
   if (!berita) {
     return (
       <div className="max-w-md mx-auto py-16 text-center space-y-4 bg-white p-8 rounded-3xl border border-gold/20 shadow-sm font-body">
+        <Helmet>
+          <title>Berita Tidak Ditemukan - KKM 61 Waringinkurung News</title>
+          <meta name="description" content="Artikel atau berita yang Anda cari di portal KKM Kelompok 61 Waringinkurung tidak ditemukan atau telah dipindahkan." />
+        </Helmet>
         <h2 className="text-lg font-bold text-primary">Artikel Tidak Ditemukan</h2>
         <p className="text-xs text-gray-500">Artikel yang Anda cari mungkin telah dihapus atau dipindahkan.</p>
         <Link to="/berita" className="inline-flex items-center gap-2 bg-primary text-gold text-xs font-bold px-4 py-2 rounded-xl">
@@ -194,8 +203,94 @@ export default function DetailBerita() {
     )
   }
 
+  const currentUrl = window.location.href
+  const secureCoverImage = getSecureImageUrl(berita.gambar)
+  const metaKeywords = berita.tags || `${berita.kategori}, KKM 61, Waringinkurung, UNIBA 2026, Kabupaten Serang`
+
+  // 1. Schema NewsArticle
+  const newsArticleSchema = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    "headline": berita.judul,
+    "image": [secureCoverImage],
+    "datePublished": berita.created_at || berita.tanggal,
+    "dateModified": berita.updated_at || berita.tanggal,
+    "author": [{
+        "@type": "Person",
+        "name": berita.penulis || "Humas KKM 61",
+        "jobTitle": "Reporter KKM 61 Waringinkurung"
+    }],
+    "publisher": {
+        "@type": "Organization",
+        "name": "KKM 61 Waringinkurung News",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://kkm61waringinkurungnews.my.id/logo-kkm.png"
+        }
+    },
+    "description": berita.ringkasan
+  }
+
+  // 2. Schema BreadcrumbList (LANGKAH 3)
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Beranda",
+        "item": "https://kkm61waringinkurungnews.my.id/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Berita",
+        "item": "https://kkm61waringinkurungnews.my.id/berita"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": berita.judul,
+        "item": currentUrl
+      }
+    ]
+  }
+
   return (
     <article className="animate-fade-in-up space-y-8 font-body max-w-7xl mx-auto pb-16">
+      
+      {/* INJEKSI SEO META TAGS, NEWSARTICLE & BREADCRUMB SCHEMA */}
+      <Helmet>
+        <title>{`${berita.judul} - KKM 61 Waringinkurung News`}</title>
+        <meta name="description" content={berita.ringkasan} />
+        <meta name="keywords" content={metaKeywords} />
+        <link rel="canonical" href={currentUrl} />
+
+        {/* Open Graph Meta / Facebook / WhatsApp */}
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={berita.judul} />
+        <meta property="og:description" content={berita.ringkasan} />
+        <meta property="og:image" content={secureCoverImage} />
+        <meta property="og:url" content={currentUrl} />
+        <meta property="og:site_name" content="KKM 61 Waringinkurung News" />
+
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={berita.judul} />
+        <meta name="twitter:description" content={berita.ringkasan} />
+        <meta name="twitter:image" content={secureCoverImage} />
+
+        {/* JSON-LD Schema NewsArticle */}
+        <script type="application/ld+json">
+          {JSON.stringify(newsArticleSchema)}
+        </script>
+
+        {/* JSON-LD Schema BreadcrumbList */}
+        <script type="application/ld+json">
+          {JSON.stringify(breadcrumbSchema)}
+        </script>
+      </Helmet>
       
       {/* NAVIGASI BREADCRUMB */}
       <div className="flex items-center justify-between border-b border-gold/20 pb-4">
@@ -300,7 +395,11 @@ export default function DetailBerita() {
       {berita.gambar && (
         <div className="space-y-2 max-w-5xl">
           <div className="w-full h-[260px] sm:h-[480px] rounded-3xl overflow-hidden border border-gold/30 shadow-lg relative bg-primary/10">
-            <img src={getSecureImageUrl(berita.gambar)} alt={berita.judul} className="w-full h-full object-cover" />
+            <img 
+              src={getSecureImageUrl(berita.gambar)} 
+              alt={`Foto Cover Liputan: ${berita.judul} - KKM 61 Desa Waringinkurung Kabupaten Serang`} 
+              className="w-full h-full object-cover" 
+            />
           </div>
           <p className="text-[11px] sm:text-xs text-gray-500 italic text-center">
             Dokumentasi Liputan: {berita.judul}
@@ -360,7 +459,11 @@ export default function DetailBerita() {
                 >
                   <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-gold/20 bg-primary/10">
                     {item.gambar ? (
-                      <img src={getSecureImageUrl(item.gambar)} alt={item.judul} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                      <img 
+                        src={getSecureImageUrl(item.gambar)} 
+                        alt={`Thumbnail Berita: ${item.judul} - KKM 61 Waringinkurung`} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform" 
+                      />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-primary font-bold text-xs">
                         KKM
@@ -404,7 +507,11 @@ export default function DetailBerita() {
                   >
                     <div className="w-20 h-16 rounded-xl overflow-hidden shrink-0 border border-gray-200 bg-white">
                       {item.gambar ? (
-                        <img src={getSecureImageUrl(item.gambar)} alt={item.judul} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                        <img 
+                          src={getSecureImageUrl(item.gambar)} 
+                          alt={`Foto Berita: ${item.judul} - Desa Waringinkurung`} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform" 
+                        />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-primary font-bold text-[10px]">
                           KKM 61
