@@ -22,6 +22,17 @@ import {
   Loader2
 } from 'lucide-react'
 
+// Helper sederhana pembuat slug ramah SEO dari judul berita
+const createSlug = (text) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')        // Ganti spasi dengan -
+    .replace(/[^\w\-]+/g, '')    // Hapus karakter non-alphanumeric
+    .replace(/\-\-+/g, '-')      // Ganti multiple - dengan single -
+}
+
 export default function AdminBerita() {
   const [berita, setBerita] = useState([])
   const [loading, setLoading] = useState(true)
@@ -80,7 +91,7 @@ export default function AdminBerita() {
     } catch (err) {
       console.error('Error fetching berita:', err)
       setBerita([])
-    } finally {
+    } fontally {
       setLoading(false)
     }
   }
@@ -212,6 +223,7 @@ export default function AdminBerita() {
     const payload = new FormData()
     payload.append('gambar', file)
     payload.append('judul', 'Cover Temp')
+    payload.append('slug', 'cover-temp')
     payload.append('tanggal', new Date().toISOString().split('T')[0])
     payload.append('ringkasan', 'Temp Cover')
 
@@ -250,6 +262,7 @@ export default function AdminBerita() {
     const payload = new FormData()
     payload.append('gambar', file)
     payload.append('judul', 'Sisipan Temp')
+    payload.append('slug', 'sisipan-temp')
     payload.append('tanggal', new Date().toISOString().split('T')[0])
     payload.append('ringkasan', 'Temp Sisipan')
 
@@ -296,6 +309,7 @@ export default function AdminBerita() {
 
     const dataToSend = new FormData()
     dataToSend.append('judul', formData.judul)
+    dataToSend.append('slug', createSlug(formData.judul)) // PERBAIKAN: Sertakan slug otomatis dari judul
     dataToSend.append('ringkasan', formData.ringkasan)
     dataToSend.append('isi', jsonIsi)
     dataToSend.append('tanggal', formData.tanggal)
@@ -411,7 +425,7 @@ export default function AdminBerita() {
                   </td>
                   <td className="p-3.5 max-w-xs">
                     <div className="font-bold text-primary text-sm line-clamp-1">{item.judul}</div>
-                    <div className="text-[11px] text-gray-400 line-clamp-1">{item.ringkasan}</div>
+                    <div className="text-[10px] text-gray-400 font-mono truncate">/berita/{item.slug || 'tanpa-slug'}</div>
                   </td>
                   <td className="p-3.5">
                     <span className="bg-gold/10 text-gold font-bold px-2 py-0.5 rounded text-[10px] inline-block mb-1 border border-gold/20">

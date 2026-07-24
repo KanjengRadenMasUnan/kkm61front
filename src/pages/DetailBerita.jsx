@@ -329,13 +329,22 @@ export default function DetailBerita() {
             {renderKontenBerita(berita.isi)}
           </div>
 
+          {/* TOPIK TERKAIT DINAMIS */}
           <div className="pt-6 border-t border-gray-100 flex flex-wrap items-center gap-2">
             <span className="text-xs font-bold text-primary">Topik Terkait:</span>
-            {['KKM 61', 'Waringinkurung', 'UNIBA 2026', berita.kategori || 'Pengabdian'].map((tag, idx) => (
-              <span key={idx} className="bg-gray-100 hover:bg-gold/20 hover:text-primary text-gray-600 text-[11px] font-semibold px-3 py-1 rounded-full transition-colors cursor-pointer">
-                #{tag}
-              </span>
-            ))}
+            {[
+              berita.kategori || 'Pengabdian',
+              'KKM 61',
+              'Waringinkurung',
+              'UNIBA 2026',
+              ...(berita.penulis ? [berita.penulis] : [])
+            ]
+              .filter(Boolean)
+              .map((tag, idx) => (
+                <span key={idx} className="bg-gray-100 hover:bg-gold/20 hover:text-primary text-gray-600 text-[11px] font-semibold px-3 py-1 rounded-full transition-colors cursor-pointer">
+                  #{tag}
+                </span>
+              ))}
           </div>
         </div>
 
