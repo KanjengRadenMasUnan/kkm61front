@@ -27,25 +27,20 @@ export default function DetailBerita() {
 
   const ENDPOINT_BERITA = `${API_BASE_URL}/berita`
 
-  // ===================================================
-  // HELPER PEMBERSIH URL GAMBAR (UNTUK SERVER, HP, & LOKAL)
-  // ===================================================
+  // HELPER PEMBERSIH URL GAMBAR
   const getSecureImageUrl = (url) => {
     if (!url) return ''
 
-    // 1. Jika tersimpan URL localhost/127.0.0.1 dari data lama
     if (url.includes('localhost:8000') || url.includes('127.0.0.1:8000')) {
       const cleanPath = url.replace(/^https?:\/\/[^\/]+/, '')
       const backendDomain = API_BASE_URL.replace(/\/api$/, '')
       return `${backendDomain}${cleanPath}`.replace('http://', 'https://')
     }
 
-    // 2. Paksa HTTP menjadi HTTPS (Atasi Mixed Content di HP)
     if (url.startsWith('http://')) {
       return url.replace('http://', 'https://')
     }
 
-    // 3. Jika path bersifat relatif (contoh: /storage/uploads/...)
     if (url.startsWith('/')) {
       const backendDomain = API_BASE_URL.replace(/\/api$/, '')
       return `${backendDomain}${url}`.replace('http://', 'https://')
@@ -58,7 +53,6 @@ export default function DetailBerita() {
     window.scrollTo({ top: 0, behavior: 'instant' })
     setLoading(true)
 
-    // Coba memuat via endpoint slug terlebih dahulu, jika gagal coba via endpoint standar ID
     const fetchPrimary = fetch(`${ENDPOINT_BERITA}/slug/${identifier}`)
       .then((res) => {
         if (!res.ok) return fetch(`${ENDPOINT_BERITA}/${identifier}`).then((r) => r.json())
@@ -125,7 +119,6 @@ export default function DetailBerita() {
       blocks = null
     }
 
-    // A. Render jika data berbentuk Array Blok JSON
     if (blocks && blocks.length > 0) {
       return blocks.map((block, index) => {
         if (block.type === 'paragraph') {
@@ -173,7 +166,6 @@ export default function DetailBerita() {
       })
     }
 
-    // B. Fallback jika data merupakan teks biasa
     return (
       <div className="whitespace-pre-line leading-relaxed text-ink/90">
         {isiContent}
@@ -329,20 +321,18 @@ export default function DetailBerita() {
             {renderKontenBerita(berita.isi)}
           </div>
 
-          {/* TOPIK TERKAIT DINAMIS */}
+          {/* HASHTAG / TOPIK TERKAIT SEO */}
           <div className="pt-6 border-t border-gray-100 flex flex-wrap items-center gap-2">
             <span className="text-xs font-bold text-primary">Topik Terkait:</span>
-            {[
-              berita.kategori || 'Pengabdian',
-              'KKM 61',
-              'Waringinkurung',
-              'UNIBA 2026',
-              ...(berita.penulis ? [berita.penulis] : [])
-            ]
+            {(berita.tags ? berita.tags.split(',') : [berita.kategori || 'Pengabdian', 'KKM 61', 'Waringinkurung', 'UNIBA 2026'])
+              .map((tag) => tag.trim())
               .filter(Boolean)
               .map((tag, idx) => (
-                <span key={idx} className="bg-gray-100 hover:bg-gold/20 hover:text-primary text-gray-600 text-[11px] font-semibold px-3 py-1 rounded-full transition-colors cursor-pointer">
-                  #{tag}
+                <span 
+                  key={idx} 
+                  className="bg-gray-100 hover:bg-gold/20 hover:text-primary text-gray-600 text-[11px] font-semibold px-3 py-1 rounded-full transition-colors cursor-pointer"
+                >
+                  #{tag.replace(/^#/, '')}
                 </span>
               ))}
           </div>

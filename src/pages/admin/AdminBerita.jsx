@@ -19,10 +19,11 @@ import {
   Image as ImageIcon,
   Type,
   AlignLeft,
-  Loader2
+  Loader2,
+  Tag
 } from 'lucide-react'
 
-// Helper sederhana pembuat slug ramah SEO dari judul berita
+// Helper pembuat slug otomatis dari judul
 const createSlug = (text) => {
   return text
     .toString()
@@ -53,6 +54,7 @@ export default function AdminBerita() {
     gambar: '',
     kategori: 'Pendidikan',
     penulis: 'Humas KKM 61',
+    tags: 'KKM 61, Waringinkurung, UNIBA 2026' // Field Hashtag/Tags untuk SEO
   })
 
   // Block Content State
@@ -91,7 +93,7 @@ export default function AdminBerita() {
     } catch (err) {
       console.error('Error fetching berita:', err)
       setBerita([])
-    } fontally {
+    } finally {
       setLoading(false)
     }
   }
@@ -162,6 +164,7 @@ export default function AdminBerita() {
         gambar: item.gambar || '',
         kategori: item.kategori || 'Pendidikan',
         penulis: item.penulis || 'Humas KKM 61',
+        tags: item.tags || 'KKM 61, Waringinkurung, UNIBA 2026'
       })
       setBlocks(parseIsiToBlocks(item.isi))
     } else {
@@ -173,6 +176,7 @@ export default function AdminBerita() {
         gambar: '',
         kategori: 'Pendidikan',
         penulis: 'Humas KKM 61',
+        tags: 'KKM 61, Waringinkurung, UNIBA 2026'
       })
       setBlocks([{ id: Date.now(), type: 'paragraph', content: '' }])
     }
@@ -293,12 +297,11 @@ export default function AdminBerita() {
     }
   }
 
-  // SIMPAN DATA SEBAGAI JSON STRUKTUR BLOK
+  // SIMPAN DATA SEBAGAI JSON STRUKTUR BLOK & TAGS SEO
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSubmitLoading(true)
 
-    // Validasi tidak boleh ada URL blob: tersisa
     const hasBlobBlock = blocks.some(b => b.type === 'image' && b.url && b.url.startsWith('blob:'))
     if (hasBlobBlock || (formData.gambar && formData.gambar.startsWith('blob:'))) {
       setSubmitLoading(false)
@@ -309,12 +312,13 @@ export default function AdminBerita() {
 
     const dataToSend = new FormData()
     dataToSend.append('judul', formData.judul)
-    dataToSend.append('slug', createSlug(formData.judul)) // PERBAIKAN: Sertakan slug otomatis dari judul
+    dataToSend.append('slug', createSlug(formData.judul))
     dataToSend.append('ringkasan', formData.ringkasan)
     dataToSend.append('isi', jsonIsi)
     dataToSend.append('tanggal', formData.tanggal)
     dataToSend.append('kategori', formData.kategori)
     dataToSend.append('penulis', formData.penulis)
+    dataToSend.append('tags', formData.tags) // Sertakan field Hashtag/Tags ke API
 
     if (imageFile) {
       dataToSend.append('gambar', imageFile)
@@ -590,6 +594,21 @@ export default function AdminBerita() {
                         </label>
                       </div>
                     </div>
+                  </div>
+
+                  {/* INPUT HASHTAG / TAGS SEO */}
+                  <div>
+                    <label className="font-bold text-gray-700 text-xs flex items-center justify-between mb-1">
+                      <span className="flex items-center gap-1"><Tag size={13} className="text-gold" /> Hashtag / Tag SEO Artikel</span>
+                      <span className="text-[10px] text-gray-400 font-normal">Pisahkan dengan koma</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.tags || ''}
+                      onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                      placeholder="Contoh: KKM 61, Waringinkurung, UNIBA 2026, UMKM Desa"
+                      className="w-full p-2.5 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gold bg-white"
+                    />
                   </div>
 
                   <div>
@@ -893,6 +912,17 @@ export default function AdminBerita() {
                         </div>
                       ))}
                     </div>
+
+                    {/* PREVIEW HASHTAGS */}
+                    {formData.tags && (
+                      <div className="pt-3 border-t border-gray-100 flex flex-wrap gap-1">
+                        {formData.tags.split(',').map((t, idx) => (
+                          <span key={idx} className="bg-gray-100 text-gray-600 text-[10px] px-2 py-0.5 rounded-full">
+                            #{t.trim().replace(/^#/, '')}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
