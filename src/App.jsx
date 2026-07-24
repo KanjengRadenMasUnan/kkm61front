@@ -83,7 +83,10 @@ function AppContent() {
         <Routes>
           <Route path="/" element={<Beranda />} />
           <Route path="/berita" element={<Berita />} />
-          <Route path="/berita/:id" element={<DetailBerita />} />
+          
+          {/* DIUBAH: Menggunakan :slug untuk URL ramah SEO */}
+          <Route path="/berita/:slug" element={<DetailBerita />} />
+
           <Route path="/anggota" element={<Anggota />} />
           <Route path="/program-kerja" element={<ProgramKerja />} />
           <Route path="/program-kerja/bidang/:id" element={<DetailBidangProker />} />
