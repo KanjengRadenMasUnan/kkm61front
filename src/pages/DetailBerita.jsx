@@ -16,7 +16,8 @@ import {
 } from 'lucide-react'
 
 export default function DetailBerita() {
-  const { id } = useParams()
+  const { slug, id: paramId } = useParams()
+  const identifier = slug || paramId
   const [berita, setBerita] = useState(null)
   const [beritaTerkait, setBeritaTerkait] = useState([])
   const [semuaBerita, setSemuaBerita] = useState([])
@@ -57,13 +58,20 @@ export default function DetailBerita() {
     window.scrollTo({ top: 0, behavior: 'instant' })
     setLoading(true)
 
-    fetch(`${ENDPOINT_BERITA}/${id}`)
+    // Coba memuat via endpoint slug terlebih dahulu, jika gagal coba via endpoint standar ID
+    const fetchPrimary = fetch(`${ENDPOINT_BERITA}/slug/${identifier}`)
       .then((res) => {
-        if (!res.ok) throw new Error('Gagal memuat berita')
+        if (!res.ok) return fetch(`${ENDPOINT_BERITA}/${identifier}`).then((r) => r.json())
         return res.json()
       })
+
+    fetchPrimary
       .then((data) => {
-        setBerita(data)
+        if (data && (data.id || data.slug)) {
+          setBerita(data)
+        } else {
+          setBerita(null)
+        }
         setLoading(false)
       })
       .catch((err) => {
@@ -76,13 +84,13 @@ export default function DetailBerita() {
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
-          const filtered = data.filter((item) => String(item.id) !== String(id))
+          const filtered = data.filter((item) => String(item.id) !== String(identifier) && item.slug !== identifier)
           setBeritaTerkait(filtered.slice(0, 4))
           setSemuaBerita(filtered)
         }
       })
       .catch((err) => console.error('Error fetching berita terkait:', err))
-  }, [id, ENDPOINT_BERITA])
+  }, [identifier, ENDPOINT_BERITA])
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href)
@@ -348,7 +356,7 @@ export default function DetailBerita() {
               {beritaTerkait.map((item) => (
                 <Link
                   key={item.id}
-                  to={`/berita/${item.id}`}
+                  to={`/berita/${item.slug || item.id}`}
                   className="group flex items-start gap-3 border-b border-gray-100 pb-3 last:border-none last:pb-0"
                 >
                   <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-gold/20 bg-primary/10">
@@ -392,7 +400,7 @@ export default function DetailBerita() {
                 semuaBerita.map((item) => (
                   <Link
                     key={item.id}
-                    to={`/berita/${item.id}`}
+                    to={`/berita/${item.slug || item.id}`}
                     className="group bg-gray-50 hover:bg-gold/10 p-3 rounded-2xl border border-gray-100 hover:border-gold/30 transition-all flex gap-3 items-center block shadow-2xs"
                   >
                     <div className="w-20 h-16 rounded-xl overflow-hidden shrink-0 border border-gray-200 bg-white">

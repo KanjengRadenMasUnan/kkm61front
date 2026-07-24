@@ -159,7 +159,7 @@ export default function Beranda() {
 
               <div className="pt-2">
                 <Link
-                  to={`/berita/${beritaHighlight[currentSlide]?.id}`}
+                  to={`/berita/${beritaHighlight[currentSlide]?.slug || beritaHighlight[currentSlide]?.id}`}
                   className="inline-flex items-center gap-2 bg-gold text-primary text-xs font-bold px-4 py-2 rounded-xl hover:bg-cream transition-colors"
                 >
                   <span>Baca Selengkapnya</span>

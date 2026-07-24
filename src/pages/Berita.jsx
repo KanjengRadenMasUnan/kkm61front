@@ -71,7 +71,7 @@ export default function Berita() {
         <div className="overflow-hidden whitespace-nowrap w-full">
           <div className="inline-block animate-marquee font-medium text-cream/90 text-xs">
             {listBerita.length > 0 ? (
-              listBerita.map((b) => `• ${b.judul} (${b.tanggal}) `).join('   ')
+              listBerita.map((b) => `• ${b.judul} (${b.tanggal}) `).join('    ')
             ) : (
               'Portal Liputan & Kabar Pengabdian KKM Kelompok 61 Universitas Bina Bangsa'
             )}
@@ -100,7 +100,7 @@ export default function Berita() {
             {beritaUtama && (
               <div className="lg:col-span-7">
                 <Link
-                  to={`/berita/${beritaUtama.id}`}
+                  to={`/berita/${beritaUtama.slug || beritaUtama.id}`}
                   className="group relative h-[320px] sm:h-[420px] rounded-3xl overflow-hidden border border-gold/30 shadow-lg flex flex-col justify-end p-4 sm:p-6 transition-all duration-300 block"
                 >
                   {beritaUtama.gambar ? (
@@ -144,7 +144,7 @@ export default function Berita() {
               {beritaSamping.map((item) => (
                 <Link
                   key={item.id}
-                  to={`/berita/${item.id}`}
+                  to={`/berita/${item.slug || item.id}`}
                   className="group relative flex-1 min-h-[160px] sm:min-h-[180px] rounded-3xl overflow-hidden border border-gold/30 shadow-md flex flex-col justify-end p-4 sm:p-5 transition-all duration-300 block"
                 >
                   {item.gambar ? (
@@ -243,7 +243,7 @@ export default function Berita() {
               {beritaFiltered.map((item) => (
                 <Link
                   key={item.id}
-                  to={`/berita/${item.id}`}
+                  to={`/berita/${item.slug || item.id}`}
                   className="group bg-white p-3.5 sm:p-4 rounded-3xl border border-gold/20 hover:border-gold shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row gap-3 sm:gap-4 items-center"
                 >
                   {item.gambar ? (
@@ -299,7 +299,7 @@ export default function Berita() {
               {beritaPopuler.map((pop, idx) => (
                 <Link
                   key={pop.id}
-                  to={`/berita/${pop.id}`}
+                  to={`/berita/${pop.slug || pop.id}`}
                   className="flex items-start gap-3 group border-b border-gray-100 pb-2.5 last:border-none last:pb-0"
                 >
                   <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gold/20 text-primary font-bold text-xs flex items-center justify-center shrink-0">
