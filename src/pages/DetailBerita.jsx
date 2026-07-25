@@ -262,35 +262,38 @@ export default function DetailBerita() {
       
       {/* INJEKSI SEO META TAGS, NEWSARTICLE & BREADCRUMB SCHEMA */}
       <Helmet>
-        <title>{`${berita.judul} - KKM 61 Waringinkurung News`}</title>
-        <meta name="description" content={berita.ringkasan} />
-        <meta name="keywords" content={metaKeywords} />
-        <link rel="canonical" href={currentUrl} />
+  <title>{`${berita.judul} - KKM 61 Waringinkurung News`}</title>
+  <meta name="description" content={berita.ringkasan} />
+  <meta name="keywords" content={metaKeywords} />
+  <link rel="canonical" href={currentUrl} />
 
-        {/* Open Graph Meta / Facebook / WhatsApp */}
-        <meta property="og:type" content="article" />
-        <meta property="og:title" content={berita.judul} />
-        <meta property="og:description" content={berita.ringkasan} />
-        <meta property="og:image" content={secureCoverImage} />
-        <meta property="og:url" content={currentUrl} />
-        <meta property="og:site_name" content="KKM 61 Waringinkurung News" />
+  {/* Open Graph Meta / Facebook / WhatsApp */}
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content={berita.judul} />
+  <meta property="og:description" content={berita.ringkasan} />
+  <meta property="og:image" content={secureCoverImage} />
+  <meta property="og:image:secure_url" content={secureCoverImage} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:url" content={currentUrl} />
+  <meta property="og:site_name" content="KKM 61 Waringinkurung News" />
 
-        {/* Twitter Card */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={berita.judul} />
-        <meta name="twitter:description" content={berita.ringkasan} />
-        <meta name="twitter:image" content={secureCoverImage} />
+  {/* Twitter Card */}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={berita.judul} />
+  <meta name="twitter:description" content={berita.ringkasan} />
+  <meta name="twitter:image" content={secureCoverImage} />
 
-        {/* JSON-LD Schema NewsArticle */}
-        <script type="application/ld+json">
-          {JSON.stringify(newsArticleSchema)}
-        </script>
+  {/* JSON-LD Schema NewsArticle */}
+  <script type="application/ld+json">
+    {JSON.stringify(newsArticleSchema)}
+  </script>
 
-        {/* JSON-LD Schema BreadcrumbList */}
-        <script type="application/ld+json">
-          {JSON.stringify(breadcrumbSchema)}
-        </script>
-      </Helmet>
+  {/* JSON-LD Schema BreadcrumbList */}
+  <script type="application/ld+json">
+    {JSON.stringify(breadcrumbSchema)}
+  </script>
+</Helmet>
       
       {/* NAVIGASI BREADCRUMB */}
       <div className="flex items-center justify-between border-b border-gold/20 pb-4">
