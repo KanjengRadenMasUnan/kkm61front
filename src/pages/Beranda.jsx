@@ -116,7 +116,7 @@ export default function Beranda() {
 
           <div className="lg:col-span-4 flex justify-center">
             <div className="w-40 h-40 sm:w-56 sm:h-56 bg-white/10 rounded-3xl p-4 sm:p-6 border border-gold/30 backdrop-blur-md shadow-2xl flex items-center justify-center">
-              <img src={logoKkm} alt="Logo KKM 61 Waringinkurung" className="w-full h-full object-contain drop-shadow-md" />
+              <img src={logoKkm} alt="Logo Resmi KKM 61 Desa Waringinkurung Kabupaten Serang" className="w-full h-full object-contain drop-shadow-md" />
             </div>
           </div>
         </div>
@@ -151,7 +151,7 @@ export default function Beranda() {
             {beritaHighlight[currentSlide]?.gambar ? (
               <img
                 src={beritaHighlight[currentSlide].gambar}
-                alt={beritaHighlight[currentSlide].judul}
+                alt={`Highlight Berita: ${beritaHighlight[currentSlide].judul} - KKM 61 Waringinkurung Serang`}
                 className="w-full h-full object-cover transition-transform duration-700"
               />
             ) : (
