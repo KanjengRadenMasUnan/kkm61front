@@ -28,26 +28,31 @@ export default function DetailBerita() {
 
   const ENDPOINT_BERITA = `${API_BASE_URL}/berita`
 
-  // HELPER PEMBERSIH URL GAMBAR
+  // HELPER PEMBERSIH & KONVERSI OTOMATIS CLOUDINARY KE WEBP
   const getSecureImageUrl = (url) => {
-    if (!url) return ''
+    if (!url) return 'https://kkm61waringinkurungnews.my.id/logo-kkm.png'
 
-    if (url.includes('localhost:8000') || url.includes('127.0.0.1:8000')) {
-      const cleanPath = url.replace(/^https?:\/\/[^\/]+/, '')
+    let cleanUrl = url
+
+    if (cleanUrl.includes('localhost:8000') || cleanUrl.includes('127.0.0.1:8000')) {
+      const cleanPath = cleanUrl.replace(/^https?:\/\/[^\/]+/, '')
       const backendDomain = API_BASE_URL.replace(/\/api$/, '')
-      return `${backendDomain}${cleanPath}`.replace('http://', 'https://')
+      cleanUrl = `${backendDomain}${cleanPath}`
     }
 
-    if (url.startsWith('http://')) {
-      return url.replace('http://', 'https://')
-    }
-
-    if (url.startsWith('/')) {
+    if (cleanUrl.startsWith('http://')) {
+      cleanUrl = cleanUrl.replace('http://', 'https://')
+    } else if (cleanUrl.startsWith('/')) {
       const backendDomain = API_BASE_URL.replace(/\/api$/, '')
-      return `${backendDomain}${url}`.replace('http://', 'https://')
+      cleanUrl = `${backendDomain}${cleanUrl}`.replace('http://', 'https://')
     }
 
-    return url
+    // Transformasi Otomatis Cloudinary ke WebP & Kompresi Optimal
+    if (cleanUrl.includes('cloudinary.com') && cleanUrl.includes('/upload/') && !cleanUrl.includes('/f_auto,q_auto/')) {
+      cleanUrl = cleanUrl.replace('/upload/', '/upload/f_auto,q_auto/')
+    }
+
+    return cleanUrl
   }
 
   useEffect(() => {
@@ -105,7 +110,7 @@ export default function DetailBerita() {
     return `${time} min baca`
   }
 
-  // FUNGSI UTAMA: MENGERJAKAN DEKODE BLOK JSON MENJADI ELEMEN HTML (ALT TEXT DINAMIS)
+  // FUNGSI UTAMA: MENGERJAKAN DEKODE BLOK JSON MENJADI ELEMEN HTML
   const renderKontenBerita = (isiContent) => {
     if (!isiContent) return <p className="text-gray-400 italic">Tidak ada isi berita.</p>
 
@@ -231,7 +236,7 @@ export default function DetailBerita() {
     "description": berita.ringkasan
   }
 
-  // 2. Schema BreadcrumbList (LANGKAH 3)
+  // 2. Schema BreadcrumbList
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -262,38 +267,38 @@ export default function DetailBerita() {
       
       {/* INJEKSI SEO META TAGS, NEWSARTICLE & BREADCRUMB SCHEMA */}
       <Helmet>
-  <title>{`${berita.judul} - KKM 61 Waringinkurung News`}</title>
-  <meta name="description" content={berita.ringkasan} />
-  <meta name="keywords" content={metaKeywords} />
-  <link rel="canonical" href={currentUrl} />
+        <title>{`${berita.judul} - KKM 61 Waringinkurung News`}</title>
+        <meta name="description" content={berita.ringkasan} />
+        <meta name="keywords" content={metaKeywords} />
+        <link rel="canonical" href={currentUrl} />
 
-  {/* Open Graph Meta / Facebook / WhatsApp */}
-  <meta property="og:type" content="article" />
-  <meta property="og:title" content={berita.judul} />
-  <meta property="og:description" content={berita.ringkasan} />
-  <meta property="og:image" content={secureCoverImage} />
-  <meta property="og:image:secure_url" content={secureCoverImage} />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta property="og:url" content={currentUrl} />
-  <meta property="og:site_name" content="KKM 61 Waringinkurung News" />
+        {/* Open Graph Meta / Facebook / WhatsApp */}
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={berita.judul} />
+        <meta property="og:description" content={berita.ringkasan} />
+        <meta property="og:image" content={secureCoverImage} />
+        <meta property="og:image:secure_url" content={secureCoverImage} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:url" content={currentUrl} />
+        <meta property="og:site_name" content="KKM 61 Waringinkurung News" />
 
-  {/* Twitter Card */}
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content={berita.judul} />
-  <meta name="twitter:description" content={berita.ringkasan} />
-  <meta name="twitter:image" content={secureCoverImage} />
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={berita.judul} />
+        <meta name="twitter:description" content={berita.ringkasan} />
+        <meta name="twitter:image" content={secureCoverImage} />
 
-  {/* JSON-LD Schema NewsArticle */}
-  <script type="application/ld+json">
-    {JSON.stringify(newsArticleSchema)}
-  </script>
+        {/* JSON-LD Schema NewsArticle */}
+        <script type="application/ld+json">
+          {JSON.stringify(newsArticleSchema)}
+        </script>
 
-  {/* JSON-LD Schema BreadcrumbList */}
-  <script type="application/ld+json">
-    {JSON.stringify(breadcrumbSchema)}
-  </script>
-</Helmet>
+        {/* JSON-LD Schema BreadcrumbList */}
+        <script type="application/ld+json">
+          {JSON.stringify(breadcrumbSchema)}
+        </script>
+      </Helmet>
       
       {/* NAVIGASI BREADCRUMB */}
       <div className="flex items-center justify-between border-b border-gold/20 pb-4">
@@ -399,7 +404,7 @@ export default function DetailBerita() {
         <div className="space-y-2 max-w-5xl">
           <div className="w-full h-[260px] sm:h-[480px] rounded-3xl overflow-hidden border border-gold/30 shadow-lg relative bg-primary/10">
             <img 
-              src={getSecureImageUrl(berita.gambar)} 
+              src={secureCoverImage} 
               alt={`Foto Cover Liputan: ${berita.judul} - KKM 61 Desa Waringinkurung Kabupaten Serang`} 
               className="w-full h-full object-cover" 
             />

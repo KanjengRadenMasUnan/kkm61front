@@ -22,6 +22,33 @@ export default function Beranda() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [loading, setLoading] = useState(true)
 
+  // HELPER PEMBERSIH & KONVERSI OTOMATIS CLOUDINARY KE WEBP
+  const getSecureImageUrl = (url) => {
+    if (!url) return 'https://kkm61waringinkurungnews.my.id/logo-kkm.png'
+
+    let cleanUrl = url
+
+    if (cleanUrl.includes('localhost:8000') || cleanUrl.includes('127.0.0.1:8000')) {
+      const cleanPath = cleanUrl.replace(/^https?:\/\/[^\/]+/, '')
+      const backendDomain = API_BASE_URL.replace(/\/api$/, '')
+      cleanUrl = `${backendDomain}${cleanPath}`
+    }
+
+    if (cleanUrl.startsWith('http://')) {
+      cleanUrl = cleanUrl.replace('http://', 'https://')
+    } else if (cleanUrl.startsWith('/')) {
+      const backendDomain = API_BASE_URL.replace(/\/api$/, '')
+      cleanUrl = `${backendDomain}${cleanUrl}`.replace('http://', 'https://')
+    }
+
+    // Transformasi Otomatis Cloudinary ke WebP & Kompresi Optimal
+    if (cleanUrl.includes('cloudinary.com') && cleanUrl.includes('/upload/') && !cleanUrl.includes('/f_auto,q_auto/')) {
+      cleanUrl = cleanUrl.replace('/upload/', '/upload/f_auto,q_auto/')
+    }
+
+    return cleanUrl
+  }
+
   useEffect(() => {
     fetch(`${API_BASE_URL}/berita`)
       .then((res) => {
@@ -150,7 +177,7 @@ export default function Beranda() {
           <div className="relative h-[300px] sm:h-[420px] rounded-3xl overflow-hidden border border-gold/30 shadow-lg group">
             {beritaHighlight[currentSlide]?.gambar ? (
               <img
-                src={beritaHighlight[currentSlide].gambar}
+                src={getSecureImageUrl(beritaHighlight[currentSlide].gambar)}
                 alt={`Highlight Berita: ${beritaHighlight[currentSlide].judul} - KKM 61 Waringinkurung Serang`}
                 className="w-full h-full object-cover transition-transform duration-700"
               />

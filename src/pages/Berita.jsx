@@ -8,22 +8,45 @@ import logoKkm from '../assets/logo-kkm.png'
 let cachedBeritaData = null
 
 export default function Berita() {
-  // Inisialisasi state langsung dari cache jika ada
   const [berita, setBerita] = useState(cachedBeritaData || [])
   const [loading, setLoading] = useState(!cachedBeritaData)
   const [activeCategory, setActiveCategory] = useState('Semua')
   const [search, setSearch] = useState('')
 
+  // HELPER PEMBERSIH & KONVERSI OTOMATIS CLOUDINARY KE WEBP
+  const getSecureImageUrl = (url) => {
+    if (!url) return 'https://kkm61waringinkurungnews.my.id/logo-kkm.png'
+
+    let cleanUrl = url
+
+    if (cleanUrl.includes('localhost:8000') || cleanUrl.includes('127.0.0.1:8000')) {
+      const cleanPath = cleanUrl.replace(/^https?:\/\/[^\/]+/, '')
+      const backendDomain = API_BASE_URL.replace(/\/api$/, '')
+      cleanUrl = `${backendDomain}${cleanPath}`
+    }
+
+    if (cleanUrl.startsWith('http://')) {
+      cleanUrl = cleanUrl.replace('http://', 'https://')
+    } else if (cleanUrl.startsWith('/')) {
+      const backendDomain = API_BASE_URL.replace(/\/api$/, '')
+      cleanUrl = `${backendDomain}${cleanUrl}`.replace('http://', 'https://')
+    }
+
+    // Transformasi Otomatis Cloudinary ke WebP & Kompresi Optimal
+    if (cleanUrl.includes('cloudinary.com') && cleanUrl.includes('/upload/') && !cleanUrl.includes('/f_auto,q_auto/')) {
+      cleanUrl = cleanUrl.replace('/upload/', '/upload/f_auto,q_auto/')
+    }
+
+    return cleanUrl
+  }
+
   useEffect(() => {
-    // Scroll ke atas dengan perilaku smooth/instan
     window.scrollTo({ top: 0, behavior: 'instant' })
 
-    // Jika belum ada cache, aktifkan indikator loading
     if (!cachedBeritaData) {
       setLoading(true)
     }
 
-    // Ambil data terbaru di background menggunakan API_BASE_URL dinamis dari config.js
     fetch(`${API_BASE_URL}/berita`)
       .then((res) => {
         if (!res.ok) throw new Error('Gagal mengambil data dari server')
@@ -31,7 +54,7 @@ export default function Berita() {
       })
       .then((data) => {
         const result = Array.isArray(data) ? data : []
-        cachedBeritaData = result // Simpan ke cache memori
+        cachedBeritaData = result
         setBerita(result)
         setLoading(false)
       })
@@ -105,7 +128,7 @@ export default function Berita() {
                 >
                   {beritaUtama.gambar ? (
                     <img
-                      src={beritaUtama.gambar}
+                      src={getSecureImageUrl(beritaUtama.gambar)}
                       alt={beritaUtama.judul}
                       loading="eager"
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
@@ -149,7 +172,7 @@ export default function Berita() {
                 >
                   {item.gambar ? (
                     <img
-                      src={item.gambar}
+                      src={getSecureImageUrl(item.gambar)}
                       alt={item.judul}
                       loading="eager"
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
@@ -249,7 +272,7 @@ export default function Berita() {
                   {item.gambar ? (
                     <div className="w-full sm:w-44 h-40 sm:h-32 rounded-2xl overflow-hidden shrink-0 border border-gold/10">
                       <img 
-                        src={item.gambar} 
+                        src={getSecureImageUrl(item.gambar)} 
                         alt={item.judul} 
                         loading="lazy"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
