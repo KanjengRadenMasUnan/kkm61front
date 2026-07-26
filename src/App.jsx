@@ -24,7 +24,7 @@ import AdminBerita from './pages/admin/AdminBerita'
 import AdminKegiatan from './pages/admin/AdminKegiatan'
 import AdminProker from './pages/admin/AdminProker'
 
-// Helper agar posisi scroll otomatis di paling atas setiap kali pindah halaman
+// Helper agar posisi scroll otomatis di paling atas
 function ScrollToTop() {
   const { pathname } = useLocation()
 
@@ -41,16 +41,15 @@ const ProtectedRoute = ({ children }) => {
 }
 
 // =========================================================================
-// KOMPONEN DYNAMIC SITEMAP XML (DILENGKAPI DENGAN FETCH DATA BERITA)
+// KOMPONEN SITEMAP MANDIRI (TANPA NAVBAR / FOOTER / LAYOUT)
 // =========================================================================
-const DynamicSitemap = () => {
-  const [xmlData, setXmlData] = useState('Loading Sitemap...')
+const StandaloneSitemap = () => {
+  const [xmlContent, setXmlContent] = useState('Loading Sitemap XML...')
 
   useEffect(() => {
-    document.title = "Sitemap XML"
+    document.title = "sitemap.xml"
     const baseUrl = 'https://kkm61waringinkurungnews.my.id'
 
-    // Fetch data berita langsung dari backend Laravel
     fetch('https://kkm61backend.onrender.com/api/berita')
       .then((res) => res.json())
       .then((data) => {
@@ -63,14 +62,11 @@ const DynamicSitemap = () => {
 
         let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`
         xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`
-
-        // 1. Static Routes
         xml += `  <url><loc>${baseUrl}/</loc><priority>1.0</priority><changefreq>daily</changefreq></url>\n`
         xml += `  <url><loc>${baseUrl}/berita</loc><priority>0.9</priority><changefreq>daily</changefreq></url>\n`
         xml += `  <url><loc>${baseUrl}/anggota</loc><priority>0.8</priority><changefreq>weekly</changefreq></url>\n`
         xml += `  <url><loc>${baseUrl}/program-kerja</loc><priority>0.8</priority><changefreq>weekly</changefreq></url>\n`
 
-        // 2. Dynamic News Routes
         beritaList.forEach((item) => {
           const slug = item.slug || 'berita'
           const date = item.tanggal || item.created_at || '2026-01-01'
@@ -85,11 +81,10 @@ const DynamicSitemap = () => {
         })
 
         xml += `</urlset>`
-        setXmlData(xml)
+        setXmlContent(xml)
       })
       .catch(() => {
-        // Fallback jika API backend offline/gagal
-        setXmlData(`<?xml version="1.0" encoding="UTF-8"?>
+        setXmlContent(`<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>${baseUrl}/</loc><priority>1.0</priority></url>
   <url><loc>${baseUrl}/berita</loc><priority>0.9</priority></url>
@@ -100,24 +95,49 @@ const DynamicSitemap = () => {
   }, [])
 
   return (
-    <pre style={{ wordWrap: 'break-word', whiteSpace: 'pre-wrap', fontFamily: 'monospace', margin: 0, padding: '12px', backgroundColor: '#fff', minHeight: '100vh' }}>
-      {xmlData}
+    <pre style={{ margin: 0, padding: '16px', backgroundColor: '#ffffff', color: '#000000', fontFamily: 'monospace', fontSize: '14px', whiteSpace: 'pre-wrap', wordBreak: 'break-all', minHeight: '100vh' }}>
+      {xmlContent}
     </pre>
-  );
+  )
 }
 
-// Komponen Pembungkus Utama untuk Memisahkan Layout Admin & Publik
+// Layout Publik Utama
+function PublicLayout() {
+  return (
+    <div className="min-h-screen flex flex-col justify-between relative bg-cream font-body overflow-x-hidden">
+      <Navbar />
+
+      <main className="container mx-auto px-3 sm:px-6 py-4 sm:py-8 flex-1 max-w-7xl">
+        <Routes>
+          <Route path="/" element={<Beranda />} />
+          <Route path="/berita" element={<Berita />} />
+          <Route path="/berita/:slug" element={<DetailBerita />} />
+          <Route path="/anggota" element={<Anggota />} />
+          <Route path="/program-kerja" element={<ProgramKerja />} />
+          <Route path="/program-kerja/bidang/:id" element={<DetailBidangProker />} />
+          <Route path="/program-kerja/laporan" element={<LaporanProker />} />
+          
+          {/* Catch-all publik mengarah ke Beranda */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+
+      <FloatingNewsWidget />
+      <Footer />
+    </div>
+  )
+}
+
+// Komponen Pembungkus Utama
 function AppContent() {
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith('/admin')
 
-  // Layout Khusus Admin
   if (isAdminRoute) {
     return (
       <main className="w-full min-h-screen bg-white">
         <Routes>
           <Route path="/admin/login" element={<Login />} />
-
           <Route
             path="/admin"
             element={
@@ -133,49 +153,26 @@ function AppContent() {
             <Route path="kegiatan" element={<AdminKegiatan />} />
             <Route path="program-kerja" element={<AdminProker />} />
           </Route>
-
           <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
         </Routes>
       </main>
     )
   }
 
-  // Layout Publik
-  return (
-    <div className="min-h-screen flex flex-col justify-between relative bg-cream font-body overflow-x-hidden">
-      <Navbar />
-
-      <main className="container mx-auto px-3 sm:px-6 py-4 sm:py-8 flex-1 max-w-7xl">
-        <Routes>
-          {/* ROUTE SITEMAP XML */}
-          <Route path="/sitemap.xml" element={<DynamicSitemap />} />
-
-          <Route path="/" element={<Beranda />} />
-          <Route path="/berita" element={<Berita />} />
-          
-          {/* Menggunakan :slug untuk URL ramah SEO */}
-          <Route path="/berita/:slug" element={<DetailBerita />} />
-
-          <Route path="/anggota" element={<Anggota />} />
-          <Route path="/program-kerja" element={<ProgramKerja />} />
-          <Route path="/program-kerja/bidang/:id" element={<DetailBidangProker />} />
-          <Route path="/program-kerja/laporan" element={<LaporanProker />} />
-
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
-
-      <FloatingNewsWidget />
-      <Footer />
-    </div>
-  )
+  return <PublicLayout />
 }
 
 export default function App() {
   return (
     <Router>
       <ScrollToTop />
-      <AppContent />
+      <Routes>
+        {/* RUTE SITEMAP DILETAKKAN DI LEVEL TERATAS AGAR BISA DI-ACCESS LANGSUNG */}
+        <Route path="/sitemap.xml" element={<StandaloneSitemap />} />
+        
+        {/* SISANYA DIOPER KE APP CONTENT */}
+        <Route path="*" element={<AppContent />} />
+      </Routes>
     </Router>
   )
 }
