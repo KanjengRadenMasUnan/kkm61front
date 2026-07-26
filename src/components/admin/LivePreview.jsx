@@ -71,18 +71,18 @@ export default function LivePreview({ formData, setFormData, blocks, updateBlock
           <span>Oleh: <strong className="text-primary font-semibold">{formData.penulis || 'Tim Humas KKM 61'}</strong></span>
         </div>
 
-        {/* PREVIEW COVER UTAMA (STUDIO FRAMING - ZERO CROP - FULL IMAGE) */}
+        {/* PREVIEW COVER UTAMA (TETAP FULL IMAGE TANPA DIPOTONG) */}
         {formData.gambar ? (
           <div className="space-y-1.5 pt-1">
-            <div className="w-full max-h-[420px] bg-slate-900/5 rounded-2xl border border-gray-200/80 p-1.5 flex items-center justify-center overflow-hidden shadow-2xs">
+            <div className="w-full max-h-[400px] bg-slate-900/5 rounded-2xl border border-gold/20 p-1.5 flex items-center justify-center overflow-hidden shadow-xs">
               <img 
                 src={getSecureImageUrl(formData.gambar)} 
                 alt="Preview Cover" 
-                className="w-full h-auto max-h-[400px] object-contain rounded-xl mx-auto block" 
+                className="w-full h-auto max-h-[380px] object-contain rounded-xl mx-auto block" 
               />
             </div>
             <p className="text-[11px] text-gray-400 italic text-center">
-              *Foto Cover Utama (Ditampilkan penuh sesuai resolusi asli)
+              *Foto Cover Utama (Ditampilkan penuh tanpa terpotong)
             </p>
           </div>
         ) : (
@@ -92,7 +92,7 @@ export default function LivePreview({ formData, setFormData, blocks, updateBlock
           </div>
         )}
 
-        {/* RENDER BLOK KONTEN DENGAN DUKUNGAN RICH TEXT & FULL IMAGE SISIPAN */}
+        {/* RENDER BLOK KONTEN (FOTO NARASI PAS UKURAN) */}
         <div className="space-y-4 pt-3">
           {blocks.map((block) => (
             <div key={block.id} className="relative group">
@@ -133,19 +133,17 @@ export default function LivePreview({ formData, setFormData, blocks, updateBlock
                 </blockquote>
               )}
 
-              {/* BLOK GAMBAR SISIPAN (STUDIO FRAMING - ZERO CROP) */}
+              {/* BLOK GAMBAR SISIPAN: PAS UKURAN FOTO & RATA TENGAH */}
               {block.type === 'image' && (
-                <div className="space-y-2 my-4 bg-slate-50/80 p-2.5 rounded-2xl border border-gray-200/80 shadow-2xs">
+                <div className="my-5 flex flex-col items-center justify-center bg-gray-50/60 p-3 rounded-2xl border border-gray-200/80">
                   {block.url ? (
-                    <div className="w-full max-h-[340px] bg-slate-900/5 rounded-xl p-1 flex items-center justify-center overflow-hidden">
-                      <img 
-                        src={getSecureImageUrl(block.url)} 
-                        alt="Sisipan" 
-                        className="w-full h-auto max-h-[320px] block rounded-lg object-contain mx-auto" 
-                      />
-                    </div>
+                    <img 
+                      src={getSecureImageUrl(block.url)} 
+                      alt="Sisipan" 
+                      className="max-w-full h-auto max-h-[340px] object-contain rounded-xl shadow-xs mx-auto block border border-gray-200/50" 
+                    />
                   ) : (
-                    <div className="w-full h-32 rounded-xl bg-gray-200/70 border border-dashed border-gray-300 flex items-center justify-center text-gray-500 text-xs font-medium">
+                    <div className="w-full h-28 rounded-xl bg-gray-200/70 border border-dashed border-gray-300 flex items-center justify-center text-gray-500 text-xs font-medium">
                       [ Area Gambar Sisipan ]
                     </div>
                   )}
@@ -153,7 +151,7 @@ export default function LivePreview({ formData, setFormData, blocks, updateBlock
                     contentEditable
                     suppressContentEditableWarning
                     onBlur={(e) => updateBlock(block.id, 'caption', e.target.innerText)}
-                    className="text-[11px] text-gray-500 italic text-center hover:bg-gold/10 p-1 rounded transition-colors focus:outline-none focus:ring-1 focus:ring-gold"
+                    className="text-[11px] text-gray-500 italic text-center mt-2 hover:bg-gold/10 p-1 rounded transition-colors focus:outline-none focus:ring-1 focus:ring-gold w-full max-w-md"
                   >
                     {block.caption || 'Keterangan foto sisipan...'}
                   </p>
