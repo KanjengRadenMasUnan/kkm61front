@@ -171,11 +171,12 @@ export default function DetailBerita() {
           return (
             <figure key={block.id || index} className="my-6 space-y-2">
               {block.url ? (
-                <div className="w-full h-64 sm:h-96 rounded-2xl overflow-hidden border border-gold/20 shadow-sm bg-gray-100">
+                /* UKURAN GAMBAR SISIPAN FLUESIBEL MENGIKUTI RASIO ASLI */
+                <div className="w-full rounded-2xl overflow-hidden border border-gold/20 shadow-sm bg-gray-50 p-2 flex items-center justify-center">
                   <img 
                     src={getSecureImageUrl(block.url)} 
                     alt={block.caption ? `${block.caption} - ${berita.judul} Waringinkurung Serang` : `Dokumentasi ${berita.judul} - KKM 61 Waringinkurung`} 
-                    className="w-full h-full object-cover" 
+                    className="w-full h-auto max-h-[550px] object-contain rounded-xl" 
                   />
                 </div>
               ) : null}
@@ -408,14 +409,14 @@ export default function DetailBerita() {
         </div>
       </div>
 
-      {/* GAMBAR COVER UTAMA */}
+      {/* GAMBAR COVER UTAMA (FLEKSIBER MENGIKUTI UKURAN ASLI FOTO) */}
       {berita.gambar && (
-        <div className="space-y-2 max-w-5xl">
-          <div className="w-full h-[260px] sm:h-[480px] rounded-3xl overflow-hidden border border-gold/30 shadow-lg relative bg-primary/10">
+        <div className="space-y-2 max-w-5xl mx-auto">
+          <div className="w-full rounded-3xl overflow-hidden border border-gold/30 shadow-lg relative bg-primary/5 p-2 flex items-center justify-center">
             <img 
               src={secureCoverImage} 
               alt={`Foto Cover Liputan: ${berita.judul} - KKM 61 Desa Waringinkurung Kabupaten Serang`} 
-              className="w-full h-full object-cover" 
+              className="w-full h-auto max-h-[600px] object-contain rounded-2xl" 
             />
           </div>
           <p className="text-[11px] sm:text-xs text-gray-500 italic text-center">
@@ -428,7 +429,7 @@ export default function DetailBerita() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         <div className="lg:col-span-8 bg-white p-6 sm:p-10 rounded-3xl border border-gold/20 shadow-sm space-y-6">
           
-          {/* HASIL DEKODE RENDER KONTEN BERITA WITH MARKDOWN PARSER */}
+          {/* HASIL DEKODE RENDER KONTEN BERITA */}
           <div
             className={`font-body text-ink/90 leading-relaxed space-y-4 ${
               fontSize === 'sm' ? 'text-xs sm:text-sm' : fontSize === 'lg' ? 'text-base sm:text-xl' : 'text-sm sm:text-base'

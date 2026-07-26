@@ -61,9 +61,14 @@ export default function LivePreview({ formData, setFormData, blocks, updateBlock
           <span>Oleh: <strong>{formData.penulis}</strong></span>
         </div>
 
+        {/* PREVIEW COVER DENGAN RASIO ASLI */}
         {formData.gambar ? (
-          <div className="w-full h-48 rounded-2xl overflow-hidden border border-gold/20">
-            <img src={getSecureImageUrl(formData.gambar)} alt="Preview Cover" className="w-full h-full object-cover" />
+          <div className="w-full rounded-2xl overflow-hidden border border-gold/20 bg-gray-50 p-2 flex items-center justify-center">
+            <img 
+              src={getSecureImageUrl(formData.gambar)} 
+              alt="Preview Cover" 
+              className="w-full h-auto max-h-[350px] object-contain rounded-xl" 
+            />
           </div>
         ) : (
           <div className="w-full h-36 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-xs">
@@ -111,8 +116,13 @@ export default function LivePreview({ formData, setFormData, blocks, updateBlock
               {block.type === 'image' && (
                 <div className="space-y-1 my-3 bg-gray-50 p-2 rounded-2xl border border-gray-200">
                   {block.url ? (
-                    <div className="w-full h-40 rounded-xl overflow-hidden">
-                      <img src={getSecureImageUrl(block.url)} alt="Sisipan" className="w-full h-full object-cover" />
+                    /* PREVIEW GAMBAR SISIPAN DENGAN RASIO ASLI */
+                    <div className="w-full rounded-xl overflow-hidden bg-white p-1 flex items-center justify-center">
+                      <img 
+                        src={getSecureImageUrl(block.url)} 
+                        alt="Sisipan" 
+                        className="w-full h-auto max-h-[300px] object-contain rounded-lg" 
+                      />
                     </div>
                   ) : (
                     <div className="w-full h-28 rounded-xl bg-gray-200 flex items-center justify-center text-gray-400 text-xs">
