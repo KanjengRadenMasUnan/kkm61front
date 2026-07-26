@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://kkm61waringinkurungnews.my.id/</loc>
+    <priority>1.0</priority>
+    <changefreq>daily</changefreq>
+  </url>
+  <url>
+    <loc>https://kkm61waringinkurungnews.my.id/berita</loc>
+    <priority>0.9</priority>
+    <changefreq>daily</changefreq>
+  </url>
+  <url>
+    <loc>https://kkm61waringinkurungnews.my.id/anggota</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://kkm61waringinkurungnews.my.id/program-kerja</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://kkm61waringinkurungnews.my.id/berita/peningkatan-kesadaran-masyarakat-terhadap-pentingnya-deteksi-dini-penyakit-melalui-program-cek-kesehatan-gratis-ckg-oleh-mahasiswa-kkm-kelompok-61-universitas-bina-bangsa-di-desa-waringin-kurung</loc>
+    <lastmod>2026-07-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+</urlset>
