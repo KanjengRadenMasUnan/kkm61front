@@ -122,7 +122,7 @@ export default function DetailBerita() {
     return `${time} min baca`
   }
 
-  // FUNGSI RENDER BLOK NARASI (SMART FIT: FOTO PAS UKURAN ASLI & CAPTION KAPSUL)
+  // FUNGSI RENDER BLOK NARASI (FOTO SISIPAN PAS DENGAN UKURAN FOTONYA)
   const renderKontenBerita = (isiContent) => {
     if (!isiContent) return <p className="text-gray-400 italic">Tidak ada isi berita.</p>
 
@@ -163,16 +163,16 @@ export default function DetailBerita() {
           )
         }
 
-        // FOTO NARASI: SMART FIT (PAS DENGAN RASIO ASLI, ANTI-RAKSASA, & CAPTION KAPSUL)
+        // FOTO NARASI: PAS DENGAN UKURAN ASLIPADA BAGIAN ISI ARTIKEL
         if (block.type === 'image') {
           return (
-            <figure key={block.id || index} className="my-8 sm:my-10 flex flex-col items-center justify-center w-full">
+            <figure key={block.id || index} className="my-8 flex flex-col items-center justify-center w-full">
               {block.url ? (
-                <div className="relative group max-w-full">
+                <div className="relative max-w-full">
                   <img 
                     src={getSecureImageUrl(block.url)} 
                     alt={block.caption ? `${block.caption} - ${berita.judul}` : `Dokumentasi ${berita.judul}`} 
-                    className="max-w-full w-auto h-auto max-h-[550px] object-contain rounded-2xl shadow-md border border-gray-200/80 mx-auto block transition-transform duration-300 group-hover:scale-[1.01]" 
+                    className="max-w-full w-auto h-auto max-h-[520px] object-contain rounded-2xl shadow-md border border-gray-200/80 mx-auto block" 
                   />
                 </div>
               ) : null}
@@ -275,7 +275,7 @@ export default function DetailBerita() {
   }
 
   return (
-    <article className="animate-fade-in-up space-y-8 font-body max-w-7xl mx-auto pb-16">
+    <article className="animate-fade-in-up space-y-8 font-body max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
       
       <Helmet>
         <title>{`${berita.judul} - KKM 61 Waringinkurung News`}</title>
@@ -337,7 +337,7 @@ export default function DetailBerita() {
           </span>
         </div>
 
-        <h1 className="text-2xl sm:text-4xl font-bold font-display text-primary leading-tight sm:leading-snug">
+        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold font-display text-primary leading-tight sm:leading-snug">
           {berita.judul}
         </h1>
 
@@ -345,7 +345,7 @@ export default function DetailBerita() {
           {parseFormattedText(berita.ringkasan)}
         </p>
 
-        {/* METADATA PENULIS */}
+        {/* METADATA PENULIS & KONTROL TEKS */}
         <div className="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-b border-gray-100 py-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-primary text-gold flex items-center justify-center font-bold text-sm border border-gold/30 shadow-sm">
@@ -406,10 +406,10 @@ export default function DetailBerita() {
         </div>
       </div>
 
-      {/* GAMBAR COVER UTAMA: RASIO PRESISI 16:9 (CINEMATIC HEADER) */}
+      {/* GAMBAR COVER UTAMA: FULL-WIDTH BANNER DENGAN MARGIN LAYAR SANGAT RAPI */}
       {berita.gambar && (
-        <div className="space-y-2.5 max-w-5xl mx-auto w-full">
-          <div className="w-full aspect-video rounded-3xl overflow-hidden border border-gold/20 shadow-lg bg-gray-100 relative">
+        <div className="w-full space-y-2.5 my-6">
+          <div className="w-full aspect-[16/9] md:aspect-[21/9] rounded-2xl sm:rounded-3xl overflow-hidden border border-gold/20 shadow-xl bg-gray-900/10">
             <img 
               src={secureCoverImage} 
               alt={`Foto Cover Liputan: ${berita.judul} - KKM 61 Desa Waringinkurung`} 
@@ -418,13 +418,13 @@ export default function DetailBerita() {
           </div>
           <div className="flex items-center justify-center gap-1.5 text-[11px] sm:text-xs text-gray-500 italic">
             <Camera size={13} className="text-gold" />
-            <span>Dokumentasi Utama Liputan: {berita.judul}</span>
+            <span>Dokumentasi Liputan Utama: {berita.judul}</span>
           </div>
         </div>
       )}
 
       {/* PARAGRAF KONTEN & SIDEBAR */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pt-2">
         <div className="lg:col-span-8 bg-white p-6 sm:p-10 rounded-3xl border border-gold/20 shadow-sm space-y-6">
           
           <div
