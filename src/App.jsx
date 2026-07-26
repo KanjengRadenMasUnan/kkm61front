@@ -24,7 +24,7 @@ import AdminBerita from './pages/admin/AdminBerita'
 import AdminKegiatan from './pages/admin/AdminKegiatan'
 import AdminProker from './pages/admin/AdminProker'
 
-// Helper agar posisi scroll otomatis di paling atas
+// Helper agar posisi scroll otomatis di paling atas setiap pindah halaman
 function ScrollToTop() {
   const { pathname } = useLocation()
 
@@ -41,15 +41,16 @@ const ProtectedRoute = ({ children }) => {
 }
 
 // =========================================================================
-// KOMPONEN SITEMAP MANDIRI (TANPA NAVBAR / FOOTER / LAYOUT)
+// KOMPONEN SITEMAP MANDIRI (TANPA AKHIRAN .XML AGAR LOLOS DARI JEBAKAN RENDER)
 // =========================================================================
 const StandaloneSitemap = () => {
-  const [xmlContent, setXmlContent] = useState('Loading Sitemap XML...')
+  const [xmlContent, setXmlContent] = useState('Loading Sitemap...')
 
   useEffect(() => {
-    document.title = "sitemap.xml"
+    document.title = "Sitemap"
     const baseUrl = 'https://kkm61waringinkurungnews.my.id'
 
+    // Fetch data berita langsung dari backend Laravel
     fetch('https://kkm61backend.onrender.com/api/berita')
       .then((res) => res.json())
       .then((data) => {
@@ -84,6 +85,7 @@ const StandaloneSitemap = () => {
         setXmlContent(xml)
       })
       .catch(() => {
+        // Fallback jika API backend offline
         setXmlContent(`<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>${baseUrl}/</loc><priority>1.0</priority></url>
@@ -101,7 +103,7 @@ const StandaloneSitemap = () => {
   )
 }
 
-// Layout Publik Utama
+// Layout Publik Utama (Dengan Navbar, Footer & Widget)
 function PublicLayout() {
   return (
     <div className="min-h-screen flex flex-col justify-between relative bg-cream font-body overflow-x-hidden">
@@ -117,7 +119,7 @@ function PublicLayout() {
           <Route path="/program-kerja/bidang/:id" element={<DetailBidangProker />} />
           <Route path="/program-kerja/laporan" element={<LaporanProker />} />
           
-          {/* Catch-all publik mengarah ke Beranda */}
+          {/* Catch-all halaman publik mengarah ke Beranda */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
@@ -128,11 +130,12 @@ function PublicLayout() {
   )
 }
 
-// Komponen Pembungkus Utama
+// Pembungkus Utama Logika Layout
 function AppContent() {
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith('/admin')
 
+  // Jika Rute Admin
   if (isAdminRoute) {
     return (
       <main className="w-full min-h-screen bg-white">
@@ -159,6 +162,7 @@ function AppContent() {
     )
   }
 
+  // Jika Rute Publik
   return <PublicLayout />
 }
 
@@ -167,10 +171,10 @@ export default function App() {
     <Router>
       <ScrollToTop />
       <Routes>
-        {/* RUTE SITEMAP DILETAKKAN DI LEVEL TERATAS AGAR BISA DI-ACCESS LANGSUNG */}
-        <Route path="/sitemap.xml" element={<StandaloneSitemap />} />
+        {/* RUTE SITEMAP DITARUH PALING ATAS TANPA AKHIRAN .XML */}
+        <Route path="/sitemap" element={<StandaloneSitemap />} />
         
-        {/* SISANYA DIOPER KE APP CONTENT */}
+        {/* SEMUA RUTE LAIN DITERUSKAN KE APP CONTENT */}
         <Route path="*" element={<AppContent />} />
       </Routes>
     </Router>
