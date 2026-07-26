@@ -32,31 +32,48 @@ export default function BlockEditor({
   uploadingBlockId,
   handleBlockImageUpload
 }) {
-  // Gambar yang akan ditampilkan (bisa dari previewGambar atau formData.gambar)
   const coverImageSrc = previewGambar || formData.gambar
 
   return (
     <div className="space-y-6 font-body">
       
-      {/* 1. INFORMASI DASAR BERITA */}
+      {/* METADATA LIPUTAN */}
       <div className="bg-gray-50/80 p-4 sm:p-5 rounded-2xl border border-gray-200/80 space-y-4">
         <h4 className="font-bold text-xs text-primary uppercase tracking-wider border-b border-gray-200 pb-2">
           Metadata Liputan
         </h4>
 
-        {/* JUDUL */}
-        <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1">
-            Judul Berita / Liputan <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            required
-            placeholder="Contoh: Pengabdian Masyarakat KKM 61 Desa Waringinkurung..."
-            value={formData.judul}
-            onChange={(e) => setFormData({ ...formData, judul: e.target.value })}
-            className="w-full text-xs font-semibold p-2.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white"
-          />
+        {/* INPUT JUDUL & PENGATUR UKURAN FONT */}
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <div className="sm:col-span-3">
+            <label className="block text-xs font-bold text-gray-700 mb-1">
+              Judul Berita / Liputan <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="Contoh: Pengabdian Masyarakat KKM 61 Desa Waringinkurung..."
+              value={formData.judul}
+              onChange={(e) => setFormData({ ...formData, judul: e.target.value })}
+              className="w-full text-xs font-semibold p-2.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-gray-700 mb-1">
+              Ukuran Judul
+            </label>
+            <select
+              value={formData.ukuranJudul || 'md'}
+              onChange={(e) => setFormData({ ...formData, ukuranJudul: e.target.value })}
+              className="w-full text-xs p-2.5 rounded-xl border border-gray-300 bg-white font-medium"
+            >
+              <option value="sm">Kecil (Small)</option>
+              <option value="md">Sedang (Medium)</option>
+              <option value="lg">Besar (Large)</option>
+              <option value="xl">Sangat Besar (XL)</option>
+            </select>
+          </div>
         </div>
 
         {/* RINGKASAN / LEAD */}
@@ -100,7 +117,7 @@ export default function BlockEditor({
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-gray-700 mb-1">Penulis / Reporst</label>
+            <label className="block text-[11px] font-bold text-gray-700 mb-1">Penulis / Reporter</label>
             <input
               type="text"
               value={formData.penulis}
@@ -123,7 +140,7 @@ export default function BlockEditor({
         </div>
       </div>
 
-      {/* 2. AREA FOTO COVER UTAMA DENGAN FITUR HAPUS */}
+      {/* AREA FOTO COVER UTAMA DENGAN TOMBOL HAPUS */}
       <div className="space-y-2">
         <label className="block text-xs font-bold text-primary uppercase tracking-wider">
           Foto Cover Utama <span className="text-red-500">*</span>
@@ -135,15 +152,12 @@ export default function BlockEditor({
             <span className="text-xs font-semibold">Mengunggah foto cover ke server...</span>
           </div>
         ) : coverImageSrc ? (
-          /* TAMPILAN PREVIEW JIKA FOTO SUDAH DIPILIH / ADA DARI DATABASE */
-          <div className="relative w-full max-h-[360px] bg-slate-900/5 rounded-2xl border border-gray-200 p-2 flex items-center justify-center overflow-hidden group shadow-2xs">
+          <div className="relative w-full aspect-video bg-slate-900/5 rounded-2xl border border-gray-200 overflow-hidden group shadow-2xs">
             <img 
               src={coverImageSrc} 
               alt="Cover Berita" 
-              className="w-full h-auto max-h-[340px] object-contain rounded-xl mx-auto block" 
+              className="w-full h-full object-cover block" 
             />
-            
-            {/* TOMBOL HAPUS FOTO COVER */}
             <button
               type="button"
               onClick={handleRemoveCover}
@@ -155,7 +169,6 @@ export default function BlockEditor({
             </button>
           </div>
         ) : (
-          /* BOX UPLOAD JIKA BELUM ADA FOTO COVER */
           <label 
             htmlFor="input-cover-editor"
             className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer bg-gray-50/80 hover:bg-gold/5 hover:border-gold/50 transition-all group"
@@ -167,7 +180,7 @@ export default function BlockEditor({
               Klik untuk memilih foto cover berita
             </span>
             <span className="text-[10px] text-gray-400 mt-0.5">
-              Mendukung JPG, PNG, WEBP (Ditampilkan 100% Full Image)
+              Mendukung JPG, PNG, WEBP (Banner Rasio 16:9)
             </span>
             <input 
               id="input-cover-editor"
@@ -180,7 +193,7 @@ export default function BlockEditor({
         )}
       </div>
 
-      {/* 3. BLOK EDITOR NARASI BERITA */}
+      {/* BLOK EDITOR NARASI */}
       <div className="space-y-4 pt-2">
         <div className="flex items-center justify-between border-b border-gray-200 pb-2">
           <h4 className="font-bold text-xs text-primary uppercase tracking-wider flex items-center gap-1.5">
@@ -189,14 +202,12 @@ export default function BlockEditor({
           <span className="text-[10px] text-gray-400">Gunakan toolbar untuk format teks</span>
         </div>
 
-        {/* DAFTAR BLOK */}
         <div className="space-y-4">
           {blocks.map((block, index) => (
             <div 
               key={block.id} 
               className="bg-white p-3.5 sm:p-4 rounded-2xl border border-gray-200/90 shadow-2xs space-y-2 hover:border-gold/40 transition-colors"
             >
-              {/* HEADER KONTROL PER BLOK */}
               <div className="flex items-center justify-between bg-gray-50 p-2 rounded-xl text-xs">
                 <span className="font-bold text-gray-600 uppercase text-[10px] flex items-center gap-1">
                   {block.type === 'paragraph' && <AlignLeft size={12} />}
@@ -236,10 +247,8 @@ export default function BlockEditor({
                 </div>
               </div>
 
-              {/* ISI BLOK Sesuai Tipe */}
               {block.type === 'paragraph' && (
                 <div className="space-y-1.5">
-                  {/* TOOLBAR FORMATTING */}
                   <div className="flex items-center gap-1 bg-gray-100/80 p-1 rounded-lg w-fit">
                     <button
                       type="button"
@@ -278,7 +287,7 @@ export default function BlockEditor({
                   <textarea
                     id={`textarea-block-${block.id}`}
                     rows={3}
-                    placeholder="Tulis narasi paragraf di sini... Gunakan toolbar di atas untuk format BOLD/ITALIC."
+                    placeholder="Tulis narasi paragraf di sini..."
                     value={block.content}
                     onChange={(e) => updateBlock(block.id, 'content', e.target.value)}
                     className="w-full text-xs p-2.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary leading-relaxed"
@@ -306,7 +315,6 @@ export default function BlockEditor({
                 />
               )}
 
-              {/* FOTO NARASI SISIPAN */}
               {block.type === 'image' && (
                 <div className="space-y-2 pt-1">
                   {uploadingBlockId === block.id ? (

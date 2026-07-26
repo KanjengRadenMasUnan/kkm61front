@@ -17,7 +17,7 @@ import {
   Camera
 } from 'lucide-react'
 
-// HELPER PARSER MARKDOWN (MENGONVERSI **bold**, *italic*, DAN LINK KE HTML)
+// HELPER PARSER MARKDOWN
 const parseFormattedText = (text) => {
   if (!text) return ''
 
@@ -41,7 +41,6 @@ export default function DetailBerita() {
 
   const ENDPOINT_BERITA = `${API_BASE_URL}/berita`
 
-  // HELPER PEMBERSIH & KONVERSI OTOMATIS CLOUDINARY KE WEBP
   const getSecureImageUrl = (url) => {
     if (!url) return 'https://kkm61waringinkurungnews.my.id/logo-kkm.png'
 
@@ -122,7 +121,21 @@ export default function DetailBerita() {
     return `${time} min baca`
   }
 
-  // FUNGSI RENDER BLOK NARASI (FOTO SISIPAN PAS DENGAN UKURAN FOTONYA)
+  // HELPER UNTUK MENGATUR UKURAN FONT JUDUL
+  const getHeadingSizeClass = (size) => {
+    switch (size) {
+      case 'sm':
+        return 'text-lg sm:text-2xl lg:text-3xl'
+      case 'lg':
+        return 'text-2xl sm:text-4xl lg:text-5xl'
+      case 'xl':
+        return 'text-3xl sm:text-5xl lg:text-6xl'
+      case 'md':
+      default:
+        return 'text-xl sm:text-3xl lg:text-4xl'
+    }
+  }
+
   const renderKontenBerita = (isiContent) => {
     if (!isiContent) return <p className="text-gray-400 italic">Tidak ada isi berita.</p>
 
@@ -163,7 +176,6 @@ export default function DetailBerita() {
           )
         }
 
-        // FOTO NARASI: PAS DENGAN UKURAN ASLIPADA BAGIAN ISI ARTIKEL
         if (block.type === 'image') {
           return (
             <figure key={block.id || index} className="my-8 flex flex-col items-center justify-center w-full">
@@ -337,7 +349,8 @@ export default function DetailBerita() {
           </span>
         </div>
 
-        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold font-display text-primary leading-tight sm:leading-snug">
+        {/* JUDUL DINAMIS SESUAI DENGAN UKURAN PILIHAN ADMIN */}
+        <h1 className={`font-bold font-display text-primary leading-tight sm:leading-snug ${getHeadingSizeClass(berita.ukuranJudul || berita.ukuran_judul)}`}>
           {berita.judul}
         </h1>
 
@@ -406,7 +419,7 @@ export default function DetailBerita() {
         </div>
       </div>
 
-      {/* GAMBAR COVER UTAMA: FULL-WIDTH BANNER DENGAN MARGIN LAYAR SANGAT RAPI */}
+      {/* GAMBAR COVER UTAMA: FULL-WIDTH BANNER DENGAN RASIO 16:9 / 21:9 */}
       {berita.gambar && (
         <div className="w-full space-y-2.5 my-6">
           <div className="w-full aspect-[16/9] md:aspect-[21/9] rounded-2xl sm:rounded-3xl overflow-hidden border border-gold/20 shadow-xl bg-gray-900/10">

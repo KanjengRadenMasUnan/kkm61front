@@ -13,7 +13,6 @@ import {
 import BlockEditor from '../../components/admin/BlockEditor'
 import LivePreview from '../../components/admin/LivePreview'
 
-// Helper pembuat slug otomatis dari judul
 const createSlug = (text) => {
   return text
     .toString()
@@ -31,13 +30,11 @@ export default function AdminBerita() {
   const [uploadingBlockId, setUploadingBlockId] = useState(null)
   const [uploadingCover, setUploadingCover] = useState(false)
 
-  // Canvas & Preview State
   const [isCanvasOpen, setIsCanvasOpen] = useState(false)
   const [showPreview, setShowPreview] = useState(true)
   const [editingId, setEditingId] = useState(null)
-  const [previewGambar, setPreviewGambar] = useState(null) // STATE TAMBAHAN UNTUK PREVIEW COVER
+  const [previewGambar, setPreviewGambar] = useState(null)
 
-  // Form State
   const [formData, setFormData] = useState({
     judul: '',
     ringkasan: '',
@@ -45,10 +42,10 @@ export default function AdminBerita() {
     gambar: '',
     kategori: 'Pendidikan',
     penulis: 'Humas KKM 61',
-    tags: 'KKM 61, Waringinkurung, UNIBA 2026'
+    tags: 'KKM 61, Waringinkurung, UNIBA 2026',
+    ukuranJudul: 'md' // Default ukuran sedang
   })
 
-  // Block Content State
   const [blocks, setBlocks] = useState([
     { id: 1, type: 'paragraph', content: '' }
   ])
@@ -58,7 +55,6 @@ export default function AdminBerita() {
   const categories = ['Pendidikan', 'UMKM & Ekonomi', 'Kesehatan', 'Lingkungan', 'Sosial Budaya']
   const ENDPOINT_BERITA = `${API_BASE_URL}/berita`
 
-  // Helper Pembersih URL Gambar
   const getSecureImageUrl = (url) => {
     if (!url) return ''
     if (url.startsWith('blob:')) return url
@@ -89,7 +85,6 @@ export default function AdminBerita() {
     }
   }
 
-  // PARSER PRESISI DARI DATABASE KE BLOK FORM EDIT
   const parseIsiToBlocks = (isiText) => {
     if (!isiText || typeof isiText !== 'string') {
       return [{ id: Date.now(), type: 'paragraph', content: '' }]
@@ -101,7 +96,7 @@ export default function AdminBerita() {
         return parsedJSON
       }
     } catch (e) {
-      // Fallback data teks lama
+      // Fallback
     }
 
     const paragraphs = isiText.split(/\n\n+/)
@@ -143,7 +138,6 @@ export default function AdminBerita() {
     return parsedBlocks.length > 0 ? parsedBlocks : [{ id: Date.now(), type: 'paragraph', content: isiText }]
   }
 
-  // Buka Editor Canvas
   const handleOpenCanvas = (item = null) => {
     setImageFile(null)
     if (item) {
@@ -155,9 +149,10 @@ export default function AdminBerita() {
         gambar: item.gambar || '',
         kategori: item.kategori || 'Pendidikan',
         penulis: item.penulis || 'Humas KKM 61',
-        tags: item.tags || 'KKM 61, Waringinkurung, UNIBA 2026'
+        tags: item.tags || 'KKM 61, Waringinkurung, UNIBA 2026',
+        ukuranJudul: item.ukuranJudul || item.ukuran_judul || 'md'
       })
-      setPreviewGambar(getSecureImageUrl(item.gambar)) // SET PREVIEW KETIKA EDIT
+      setPreviewGambar(getSecureImageUrl(item.gambar))
       setBlocks(parseIsiToBlocks(item.isi))
     } else {
       setEditingId(null)
@@ -168,16 +163,16 @@ export default function AdminBerita() {
         gambar: '',
         kategori: 'Pendidikan',
         penulis: 'Humas KKM 61',
-        tags: 'KKM 61, Waringinkurung, UNIBA 2026'
+        tags: 'KKM 61, Waringinkurung, UNIBA 2026',
+        ukuranJudul: 'md'
       })
-      setPreviewGambar(null) // RESET PREVIEW KETIKA BARU
+      setPreviewGambar(null)
       setBlocks([{ id: Date.now(), type: 'paragraph', content: '' }])
     }
     setShowPreview(true)
     setIsCanvasOpen(true)
   }
 
-  // MANAJEMEN BLOK
   const addBlock = (type) => {
     const newBlock = {
       id: Date.now(),
@@ -210,7 +205,6 @@ export default function AdminBerita() {
     setBlocks(newBlocks)
   }
 
-  // FUNGSI UTAMA TOOLBAR FORMATTING (BOLD, ITALIC, UNDERLINE, CODE)
   const applyFormatting = (blockId, formatType) => {
     const textarea = document.getElementById(`textarea-block-${blockId}`)
     if (!textarea) return
@@ -247,7 +241,6 @@ export default function AdminBerita() {
     }, 50)
   }
 
-  // UPLOAD COVER LANGSUNG KE CLOUDINARY SAAT FILE DIPILIH
   const handleFileUpload = async (e) => {
     const file = e.target.files[0]
     if (!file) return
@@ -273,7 +266,7 @@ export default function AdminBerita() {
         const uploadedUrl = resData.data?.gambar || resData.gambar
         if (uploadedUrl && !uploadedUrl.startsWith('blob:')) {
           setFormData((prev) => ({ ...prev, gambar: uploadedUrl }))
-          setPreviewGambar(getSecureImageUrl(uploadedUrl)) // UPDATE PREVIEW KETIKA BERHASIL UPLOAD
+          setPreviewGambar(getSecureImageUrl(uploadedUrl))
           setImageFile(null)
         }
       } else {
@@ -287,16 +280,14 @@ export default function AdminBerita() {
     }
   }
 
-  // FUNGSI UNTUK MENGHAPUS FOTO COVER (BARU DITAMBAHKAN)
   const handleRemoveCover = () => {
     setPreviewGambar(null)
     setFormData((prev) => ({ ...prev, gambar: null }))
     setImageFile(null)
-    const fileInput = document.getElementById('input-cover-berita') || document.querySelector('input[type="file"]')
+    const fileInput = document.getElementById('input-cover-editor')
     if (fileInput) fileInput.value = ''
   }
 
-  // UPLOAD GAMBAR SISIPAN BLOK LANGSUNG KE CLOUDINARY
   const handleBlockImageUpload = async (id, e) => {
     const file = e.target.files[0]
     if (!file) return
@@ -337,7 +328,6 @@ export default function AdminBerita() {
     }
   }
 
-  // SIMPAN DATA SEBAGAI JSON STRUKTUR BLOK & TAGS SEO
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSubmitLoading(true)
@@ -359,6 +349,7 @@ export default function AdminBerita() {
     dataToSend.append('kategori', formData.kategori)
     dataToSend.append('penulis', formData.penulis)
     dataToSend.append('tags', formData.tags)
+    dataToSend.append('ukuranJudul', formData.ukuranJudul || 'md')
 
     if (imageFile) {
       dataToSend.append('gambar', imageFile)
@@ -564,8 +555,8 @@ export default function AdminBerita() {
                   categories={categories}
                   uploadingCover={uploadingCover}
                   handleFileUpload={handleFileUpload}
-                  handleRemoveCover={handleRemoveCover} /* PROP TOMBOL HAPUS DITERUSKAN KE SINI */
-                  previewGambar={previewGambar} /* PROP PREVIEW DITERUSKAN KE SINI */
+                  handleRemoveCover={handleRemoveCover}
+                  previewGambar={previewGambar}
                   blocks={blocks}
                   updateBlock={updateBlock}
                   moveBlock={moveBlock}
