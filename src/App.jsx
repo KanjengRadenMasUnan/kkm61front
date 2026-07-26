@@ -40,17 +40,28 @@ const ProtectedRoute = ({ children }) => {
   return isLoggedIn ? children : <Navigate to="/admin/login" replace />
 }
 
+// Helper untuk sanitasi karakter spesial XML agar tidak corrupt/break di Google
+const escapeXml = (str) => {
+  if (!str) return ''
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;')
+}
+
 // =========================================================================
-// KOMPONEN SITEMAP MANDIRI (TANPA AKHIRAN .XML AGAR LOLOS DARI JEBAKAN RENDER)
+// KOMPONEN ADVANCED SITEMAP (SUPER OPTIMIZED FOR GOOGLE SEO)
 // =========================================================================
 const StandaloneSitemap = () => {
-  const [xmlContent, setXmlContent] = useState('Loading Sitemap...')
+  const [xmlContent, setXmlContent] = useState('<!-- Generating SEO Optimized Sitemap... -->')
 
   useEffect(() => {
-    document.title = "Sitemap"
+    document.title = "Sitemap Index | KKM 61 Waringinkurung"
     const baseUrl = 'https://kkm61waringinkurungnews.my.id'
 
-    // Fetch data berita langsung dari backend Laravel
+    // Fetch data berita dinamis dari backend
     fetch('https://kkm61backend.onrender.com/api/berita')
       .then((res) => res.json())
       .then((data) => {
@@ -61,23 +72,57 @@ const StandaloneSitemap = () => {
           beritaList = data.data
         }
 
-        let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`
-        xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`
-        xml += `  <url><loc>${baseUrl}/</loc><priority>1.0</priority><changefreq>daily</changefreq></url>\n`
-        xml += `  <url><loc>${baseUrl}/berita</loc><priority>0.9</priority><changefreq>daily</changefreq></url>\n`
-        xml += `  <url><loc>${baseUrl}/anggota</loc><priority>0.8</priority><changefreq>weekly</changefreq></url>\n`
-        xml += `  <url><loc>${baseUrl}/program-kerja</loc><priority>0.8</priority><changefreq>weekly</changefreq></url>\n`
+        const today = new Date().toISOString().split('T')[0]
 
+        let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`
+        xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n`
+        xml += `        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\n`
+        xml += `        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">\n\n`
+
+        // 1. Halaman Utama (Prioritas Tertinggi)
+        xml += `  <!-- Main Core Pages -->\n`
+        xml += `  <url>\n`
+        xml += `    <loc>${baseUrl}/</loc>\n`
+        xml += `    <lastmod>${today}</lastmod>\n`
+        xml += `    <changefreq>daily</changefreq>\n`
+        xml += `    <priority>1.00</priority>\n`
+        xml += `  </url>\n`
+
+        // 2. Hub Berita (Update Setiap Hari)
+        xml += `  <url>\n`
+        xml += `    <loc>${baseUrl}/berita</loc>\n`
+        xml += `    <lastmod>${today}</lastmod>\n`
+        xml += `    <changefreq>daily</changefreq>\n`
+        xml += `    <priority>0.90</priority>\n`
+        xml += `  </url>\n`
+
+        // 3. Halaman Informasi Publik (Update Mingguan)
+        xml += `  <url>\n`
+        xml += `    <loc>${baseUrl}/program-kerja</loc>\n`
+        xml += `    <lastmod>${today}</lastmod>\n`
+        xml += `    <changefreq>weekly</changefreq>\n`
+        xml += `    <priority>0.80</priority>\n`
+        xml += `  </url>\n`
+        xml += `  <url>\n`
+        xml += `    <loc>${baseUrl}/anggota</loc>\n`
+        xml += `    <lastmod>${today}</lastmod>\n`
+        xml += `    <changefreq>weekly</changefreq>\n`
+        xml += `    <priority>0.80</priority>\n`
+        xml += `  </url>\n\n`
+
+        // 4. Artikel & Berita Dinamis (Diurutkan dari yang terbaru)
+        xml += `  <!-- Dynamic News Articles -->\n`
         beritaList.forEach((item) => {
-          const slug = item.slug || 'berita'
-          const date = item.tanggal || item.created_at || '2026-01-01'
-          const formattedDate = date.substring(0, 10)
+          const rawSlug = item.slug || 'berita'
+          const slug = escapeXml(rawSlug)
+          const rawDate = item.tanggal || item.created_at || today
+          const formattedDate = rawDate.substring(0, 10)
 
           xml += `  <url>\n`
           xml += `    <loc>${baseUrl}/berita/${slug}</loc>\n`
           xml += `    <lastmod>${formattedDate}</lastmod>\n`
           xml += `    <changefreq>monthly</changefreq>\n`
-          xml += `    <priority>0.8</priority>\n`
+          xml += `    <priority>0.85</priority>\n`
           xml += `  </url>\n`
         })
 
@@ -85,25 +130,25 @@ const StandaloneSitemap = () => {
         setXmlContent(xml)
       })
       .catch(() => {
-        // Fallback jika API backend offline
+        const today = new Date().toISOString().split('T')[0]
         setXmlContent(`<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>${baseUrl}/</loc><priority>1.0</priority></url>
-  <url><loc>${baseUrl}/berita</loc><priority>0.9</priority></url>
-  <url><loc>${baseUrl}/anggota</loc><priority>0.8</priority></url>
-  <url><loc>${baseUrl}/program-kerja</loc><priority>0.8</priority></url>
+  <url><loc>${baseUrl}/</loc><lastmod>${today}</lastmod><priority>1.00</priority></url>
+  <url><loc>${baseUrl}/berita</loc><lastmod>${today}</lastmod><priority>0.90</priority></url>
+  <url><loc>${baseUrl}/program-kerja</loc><lastmod>${today}</lastmod><priority>0.80</priority></url>
+  <url><loc>${baseUrl}/anggota</loc><lastmod>${today}</lastmod><priority>0.80</priority></url>
 </urlset>`)
       })
   }, [])
 
   return (
-    <pre style={{ margin: 0, padding: '16px', backgroundColor: '#ffffff', color: '#000000', fontFamily: 'monospace', fontSize: '14px', whiteSpace: 'pre-wrap', wordBreak: 'break-all', minHeight: '100vh' }}>
+    <pre style={{ margin: 0, padding: '20px', backgroundColor: '#0f172a', color: '#38bdf8', fontFamily: 'Fira Code, monospace', fontSize: '13px', whiteSpace: 'pre-wrap', wordBreak: 'break-all', minHeight: '100vh', lineHeight: '1.6' }}>
       {xmlContent}
     </pre>
   )
 }
 
-// Layout Publik Utama (Dengan Navbar, Footer & Widget)
+// Layout Publik Utama
 function PublicLayout() {
   return (
     <div className="min-h-screen flex flex-col justify-between relative bg-cream font-body overflow-x-hidden">
@@ -119,7 +164,6 @@ function PublicLayout() {
           <Route path="/program-kerja/bidang/:id" element={<DetailBidangProker />} />
           <Route path="/program-kerja/laporan" element={<LaporanProker />} />
           
-          {/* Catch-all halaman publik mengarah ke Beranda */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
@@ -135,7 +179,6 @@ function AppContent() {
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith('/admin')
 
-  // Jika Rute Admin
   if (isAdminRoute) {
     return (
       <main className="w-full min-h-screen bg-white">
@@ -162,7 +205,6 @@ function AppContent() {
     )
   }
 
-  // Jika Rute Publik
   return <PublicLayout />
 }
 
@@ -171,10 +213,9 @@ export default function App() {
     <Router>
       <ScrollToTop />
       <Routes>
-        {/* RUTE SITEMAP DITARUH PALING ATAS TANPA AKHIRAN .XML */}
+        {/* RUTE SITEMAP SEO TEROPTIMASI */}
         <Route path="/sitemap" element={<StandaloneSitemap />} />
         
-        {/* SEMUA RUTE LAIN DITERUSKAN KE APP CONTENT */}
         <Route path="*" element={<AppContent />} />
       </Routes>
     </Router>
