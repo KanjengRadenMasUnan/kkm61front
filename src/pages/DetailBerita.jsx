@@ -13,7 +13,8 @@ import {
   TrendingUp, 
   ChevronRight, 
   Sparkles,
-  Newspaper
+  Newspaper,
+  Camera
 } from 'lucide-react'
 
 // HELPER PARSER MARKDOWN (MENGONVERSI **bold**, *italic*, DAN LINK KE HTML)
@@ -121,7 +122,7 @@ export default function DetailBerita() {
     return `${time} min baca`
   }
 
-  // FUNGSI RENDER BLOK NARASI BERITA (FOTO NARASI PAS MENYESUAIKAN UKURAN FOTONYA)
+  // FUNGSI RENDER BLOK NARASI (SMART FIT: FOTO PAS UKURAN ASLI & CAPTION KAPSUL)
   const renderKontenBerita = (isiContent) => {
     if (!isiContent) return <p className="text-gray-400 italic">Tidak ada isi berita.</p>
 
@@ -148,7 +149,7 @@ export default function DetailBerita() {
 
         if (block.type === 'heading') {
           return (
-            <h3 key={block.id || index} className="text-lg sm:text-xl font-bold font-display text-primary pt-3 pb-1">
+            <h3 key={block.id || index} className="text-lg sm:text-xl font-bold font-display text-primary pt-4 pb-1 border-b border-gray-100">
               {parseFormattedText(block.content)}
             </h3>
           )
@@ -156,26 +157,29 @@ export default function DetailBerita() {
 
         if (block.type === 'quote') {
           return (
-            <blockquote key={block.id || index} className="border-l-4 border-gold bg-gold/5 p-4 rounded-r-2xl italic text-primary font-semibold my-4 text-sm sm:text-base">
+            <blockquote key={block.id || index} className="border-l-4 border-gold bg-gradient-to-r from-gold/10 to-transparent p-5 rounded-r-2xl italic text-primary font-semibold my-6 text-sm sm:text-base shadow-2xs">
               "{parseFormattedText(block.content)}"
             </blockquote>
           )
         }
 
-        // FOTO NARASI: PAS MENYESUAIKAN UKURAN FOTONYA (RATA TENGAH)
+        // FOTO NARASI: SMART FIT (PAS DENGAN RASIO ASLI, ANTI-RAKSASA, & CAPTION KAPSUL)
         if (block.type === 'image') {
           return (
-            <figure key={block.id || index} className="my-8 flex flex-col items-center justify-center w-full">
+            <figure key={block.id || index} className="my-8 sm:my-10 flex flex-col items-center justify-center w-full">
               {block.url ? (
-                <img 
-                  src={getSecureImageUrl(block.url)} 
-                  alt={block.caption ? `${block.caption} - ${berita.judul}` : `Dokumentasi ${berita.judul}`} 
-                  className="max-w-full h-auto rounded-2xl border border-gray-200/80 shadow-xs mx-auto block" 
-                />
+                <div className="relative group max-w-full">
+                  <img 
+                    src={getSecureImageUrl(block.url)} 
+                    alt={block.caption ? `${block.caption} - ${berita.judul}` : `Dokumentasi ${berita.judul}`} 
+                    className="max-w-full w-auto h-auto max-h-[550px] object-contain rounded-2xl shadow-md border border-gray-200/80 mx-auto block transition-transform duration-300 group-hover:scale-[1.01]" 
+                  />
+                </div>
               ) : null}
               {block.caption && (
-                <figcaption className="text-center text-xs sm:text-[13px] text-gray-500 italic mt-2.5 max-w-xl px-4">
-                  {parseFormattedText(block.caption)}
+                <figcaption className="inline-flex items-center gap-1.5 text-center text-xs sm:text-[13px] text-gray-600 italic mt-3 bg-gray-50/90 px-4 py-1.5 rounded-full border border-gray-200/60 shadow-2xs max-w-xl">
+                  <Camera size={13} className="text-gold shrink-0" />
+                  <span>{parseFormattedText(block.caption)}</span>
                 </figcaption>
               )}
             </figure>
@@ -337,7 +341,7 @@ export default function DetailBerita() {
           {berita.judul}
         </h1>
 
-        <p className="text-sm sm:text-lg text-ink/80 font-medium leading-relaxed border-l-4 border-gold pl-4 py-1 bg-gold/5 rounded-r-2xl">
+        <p className="text-sm sm:text-lg text-ink/80 font-medium leading-relaxed border-l-4 border-gold pl-4 py-1.5 bg-gold/5 rounded-r-2xl">
           {parseFormattedText(berita.ringkasan)}
         </p>
 
@@ -402,19 +406,20 @@ export default function DetailBerita() {
         </div>
       </div>
 
-      {/* GAMBAR COVER UTAMA: RASIO PRESISI 16:9 */}
+      {/* GAMBAR COVER UTAMA: RASIO PRESISI 16:9 (CINEMATIC HEADER) */}
       {berita.gambar && (
         <div className="space-y-2.5 max-w-5xl mx-auto w-full">
-          <div className="w-full aspect-video rounded-3xl overflow-hidden border border-gold/20 shadow-md bg-gray-100">
+          <div className="w-full aspect-video rounded-3xl overflow-hidden border border-gold/20 shadow-lg bg-gray-100 relative">
             <img 
               src={secureCoverImage} 
               alt={`Foto Cover Liputan: ${berita.judul} - KKM 61 Desa Waringinkurung`} 
               className="w-full h-full object-cover block" 
             />
           </div>
-          <p className="text-[11px] sm:text-xs text-gray-500 italic text-center px-4">
-            Dokumentasi Liputan: {berita.judul}
-          </p>
+          <div className="flex items-center justify-center gap-1.5 text-[11px] sm:text-xs text-gray-500 italic">
+            <Camera size={13} className="text-gold" />
+            <span>Dokumentasi Utama Liputan: {berita.judul}</span>
+          </div>
         </div>
       )}
 
