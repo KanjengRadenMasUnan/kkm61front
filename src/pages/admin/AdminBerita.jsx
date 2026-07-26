@@ -35,6 +35,7 @@ export default function AdminBerita() {
   const [isCanvasOpen, setIsCanvasOpen] = useState(false)
   const [showPreview, setShowPreview] = useState(true)
   const [editingId, setEditingId] = useState(null)
+  const [previewGambar, setPreviewGambar] = useState(null) // STATE TAMBAHAN UNTUK PREVIEW COVER
 
   // Form State
   const [formData, setFormData] = useState({
@@ -156,6 +157,7 @@ export default function AdminBerita() {
         penulis: item.penulis || 'Humas KKM 61',
         tags: item.tags || 'KKM 61, Waringinkurung, UNIBA 2026'
       })
+      setPreviewGambar(getSecureImageUrl(item.gambar)) // SET PREVIEW KETIKA EDIT
       setBlocks(parseIsiToBlocks(item.isi))
     } else {
       setEditingId(null)
@@ -168,6 +170,7 @@ export default function AdminBerita() {
         penulis: 'Humas KKM 61',
         tags: 'KKM 61, Waringinkurung, UNIBA 2026'
       })
+      setPreviewGambar(null) // RESET PREVIEW KETIKA BARU
       setBlocks([{ id: Date.now(), type: 'paragraph', content: '' }])
     }
     setShowPreview(true)
@@ -270,6 +273,7 @@ export default function AdminBerita() {
         const uploadedUrl = resData.data?.gambar || resData.gambar
         if (uploadedUrl && !uploadedUrl.startsWith('blob:')) {
           setFormData((prev) => ({ ...prev, gambar: uploadedUrl }))
+          setPreviewGambar(getSecureImageUrl(uploadedUrl)) // UPDATE PREVIEW KETIKA BERHASIL UPLOAD
           setImageFile(null)
         }
       } else {
@@ -281,6 +285,15 @@ export default function AdminBerita() {
     } finally {
       setUploadingCover(false)
     }
+  }
+
+  // FUNGSI UNTUK MENGHAPUS FOTO COVER (BARU DITAMBAHKAN)
+  const handleRemoveCover = () => {
+    setPreviewGambar(null)
+    setFormData((prev) => ({ ...prev, gambar: null }))
+    setImageFile(null)
+    const fileInput = document.getElementById('input-cover-berita') || document.querySelector('input[type="file"]')
+    if (fileInput) fileInput.value = ''
   }
 
   // UPLOAD GAMBAR SISIPAN BLOK LANGSUNG KE CLOUDINARY
@@ -551,6 +564,8 @@ export default function AdminBerita() {
                   categories={categories}
                   uploadingCover={uploadingCover}
                   handleFileUpload={handleFileUpload}
+                  handleRemoveCover={handleRemoveCover} /* PROP TOMBOL HAPUS DITERUSKAN KE SINI */
+                  previewGambar={previewGambar} /* PROP PREVIEW DITERUSKAN KE SINI */
                   blocks={blocks}
                   updateBlock={updateBlock}
                   moveBlock={moveBlock}
