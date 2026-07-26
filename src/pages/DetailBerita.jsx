@@ -20,14 +20,9 @@ import {
 const parseFormattedText = (text) => {
   if (!text) return ''
 
-  // 1. Convert **bold** -> <strong>bold</strong>
   let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-
-  // 2. Convert *italic* atau _italic_ -> <em>italic</em>
   formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>')
   formatted = formatted.replace(/_(.*?)_/g, '<em>$1</em>')
-
-  // 3. Convert [text](url) -> <a href="url">text</a>
   formatted = formatted.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-primary font-bold underline hover:text-gold transition-colors">$1</a>')
 
   return <span dangerouslySetInnerHTML={{ __html: formatted }} />
@@ -126,7 +121,7 @@ export default function DetailBerita() {
     return `${time} min baca`
   }
 
-  // FUNGSI UTAMA: MENGERJAKAN DEKODE BLOK JSON MENJADI ELEMEN HTML
+  // FUNGSI UTAMA: RENDER BLOK JSON KONTEN BERITA DENGAN FRAMING GAMBAR PROFESIONAL
   const renderKontenBerita = (isiContent) => {
     if (!isiContent) return <p className="text-gray-400 italic">Tidak ada isi berita.</p>
 
@@ -169,19 +164,19 @@ export default function DetailBerita() {
 
         if (block.type === 'image') {
           return (
-            <figure key={block.id || index} className="my-6 space-y-2">
+            <figure key={block.id || index} className="my-8 space-y-2.5 max-w-4xl mx-auto">
               {block.url ? (
-                /* UKURAN GAMBAR SISIPAN FLUESIBEL MENGIKUTI RASIO ASLI */
-                <div className="w-full rounded-2xl overflow-hidden border border-gold/20 shadow-sm bg-gray-50 p-2 flex items-center justify-center">
+                /* KONTEN SISIPAN DENGAN BINGKAI EDITORIAL YANG RAPI */
+                <div className="w-full max-h-[480px] bg-slate-900/5 rounded-2xl border border-gray-200/80 p-1.5 sm:p-2 flex items-center justify-center overflow-hidden shadow-2xs">
                   <img 
                     src={getSecureImageUrl(block.url)} 
-                    alt={block.caption ? `${block.caption} - ${berita.judul} Waringinkurung Serang` : `Dokumentasi ${berita.judul} - KKM 61 Waringinkurung`} 
-                    className="w-full h-auto max-h-[550px] object-contain rounded-xl" 
+                    alt={block.caption ? `${block.caption} - ${berita.judul}` : `Dokumentasi ${berita.judul}`} 
+                    className="w-full h-auto max-h-[460px] object-contain rounded-xl mx-auto block" 
                   />
                 </div>
               ) : null}
               {block.caption && (
-                <figcaption className="text-center text-xs text-gray-500 italic">
+                <figcaption className="text-center text-xs sm:text-[13px] text-gray-500 italic px-4 pt-0.5">
                   {parseFormattedText(block.caption)}
                 </figcaption>
               )}
@@ -409,17 +404,17 @@ export default function DetailBerita() {
         </div>
       </div>
 
-      {/* GAMBAR COVER UTAMA (FLEKSIBER MENGIKUTI UKURAN ASLI FOTO) */}
+      {/* GAMBAR COVER UTAMA (STUDIO FRAMING & ZERO CROP ALA WEB BERITA PROFESIONAL) */}
       {berita.gambar && (
         <div className="space-y-2 max-w-5xl mx-auto">
-          <div className="w-full rounded-3xl overflow-hidden border border-gold/30 shadow-lg relative bg-primary/5 p-2 flex items-center justify-center">
+          <div className="w-full max-h-[520px] bg-slate-900/5 rounded-2xl sm:rounded-3xl border border-gray-200/80 shadow-sm flex items-center justify-center overflow-hidden p-1.5 sm:p-2">
             <img 
               src={secureCoverImage} 
-              alt={`Foto Cover Liputan: ${berita.judul} - KKM 61 Desa Waringinkurung Kabupaten Serang`} 
-              className="w-full h-auto max-h-[600px] object-contain rounded-2xl" 
+              alt={`Foto Cover Liputan: ${berita.judul} - KKM 61 Desa Waringinkurung`} 
+              className="w-full h-auto max-h-[500px] object-contain rounded-xl sm:rounded-2xl mx-auto block" 
             />
           </div>
-          <p className="text-[11px] sm:text-xs text-gray-500 italic text-center">
+          <p className="text-[11px] sm:text-xs text-gray-500 italic text-center px-4">
             Dokumentasi Liputan: {berita.judul}
           </p>
         </div>
@@ -429,7 +424,6 @@ export default function DetailBerita() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         <div className="lg:col-span-8 bg-white p-6 sm:p-10 rounded-3xl border border-gold/20 shadow-sm space-y-6">
           
-          {/* HASIL DEKODE RENDER KONTEN BERITA */}
           <div
             className={`font-body text-ink/90 leading-relaxed space-y-4 ${
               fontSize === 'sm' ? 'text-xs sm:text-sm' : fontSize === 'lg' ? 'text-base sm:text-xl' : 'text-sm sm:text-base'
@@ -438,7 +432,6 @@ export default function DetailBerita() {
             {renderKontenBerita(berita.isi)}
           </div>
 
-          {/* HASHTAG / TOPIK TERKAIT SEO */}
           <div className="pt-6 border-t border-gray-100 flex flex-wrap items-center gap-2">
             <span className="text-xs font-bold text-primary">Topik Terkait:</span>
             {(berita.tags ? berita.tags.split(',') : [berita.kategori || 'Pengabdian', 'KKM 61', 'Waringinkurung', 'UNIBA 2026'])
