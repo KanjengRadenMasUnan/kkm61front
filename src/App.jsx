@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 
 // Components
@@ -38,6 +38,72 @@ function ScrollToTop() {
 const ProtectedRoute = ({ children }) => {
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true'
   return isLoggedIn ? children : <Navigate to="/admin/login" replace />
+}
+
+// =========================================================================
+// KOMPONEN DYNAMIC SITEMAP XML (DILENGKAPI DENGAN FETCH DATA BERITA)
+// =========================================================================
+const DynamicSitemap = () => {
+  const [xmlData, setXmlData] = useState('Loading Sitemap...')
+
+  useEffect(() => {
+    document.title = "Sitemap XML"
+    const baseUrl = 'https://kkm61waringinkurungnews.my.id'
+
+    // Fetch data berita langsung dari backend Laravel
+    fetch('https://kkm61backend.onrender.com/api/berita')
+      .then((res) => res.json())
+      .then((data) => {
+        let beritaList = []
+        if (Array.isArray(data)) {
+          beritaList = data
+        } else if (data && Array.isArray(data.data)) {
+          beritaList = data.data
+        }
+
+        let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`
+        xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`
+
+        // 1. Static Routes
+        xml += `  <url><loc>${baseUrl}/</loc><priority>1.0</priority><changefreq>daily</changefreq></url>\n`
+        xml += `  <url><loc>${baseUrl}/berita</loc><priority>0.9</priority><changefreq>daily</changefreq></url>\n`
+        xml += `  <url><loc>${baseUrl}/anggota</loc><priority>0.8</priority><changefreq>weekly</changefreq></url>\n`
+        xml += `  <url><loc>${baseUrl}/program-kerja</loc><priority>0.8</priority><changefreq>weekly</changefreq></url>\n`
+
+        // 2. Dynamic News Routes
+        beritaList.forEach((item) => {
+          const slug = item.slug || 'berita'
+          const date = item.tanggal || item.created_at || '2026-01-01'
+          const formattedDate = date.substring(0, 10)
+
+          xml += `  <url>\n`
+          xml += `    <loc>${baseUrl}/berita/${slug}</loc>\n`
+          xml += `    <lastmod>${formattedDate}</lastmod>\n`
+          xml += `    <changefreq>monthly</changefreq>\n`
+          xml += `    <priority>0.8</priority>\n`
+          xml += `  </url>\n`
+        })
+
+        xml += `</urlset>`
+        setXmlData(xml)
+      })
+      .catch(() => {
+        // Fallback jika API backend offline/gagal
+        setXmlData(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>${baseUrl}/</loc><priority>1.0</priority></url>
+  <url><loc>${baseUrl}/berita</loc><priority>0.9</priority></url>
+  <url><loc>${baseUrl}/anggota</loc><priority>0.8</priority></url>
+  <url><loc>${baseUrl}/program-kerja</loc><priority>0.8</priority></url>
+</urlset>`)
+      })
+  }, [])
+
+  return (
+    <pre style={{ wordWrap: 'break-word', whiteSpace: 'pre-wrap', fontFamily: 'monospace', margin: 0, padding: '12px', backgroundColor: '#fff', minHeight: '100vh' }}>
+      {xmlData}
+    </pre>
+  );
 }
 
 // Komponen Pembungkus Utama untuk Memisahkan Layout Admin & Publik
@@ -81,10 +147,13 @@ function AppContent() {
 
       <main className="container mx-auto px-3 sm:px-6 py-4 sm:py-8 flex-1 max-w-7xl">
         <Routes>
+          {/* ROUTE SITEMAP XML */}
+          <Route path="/sitemap.xml" element={<DynamicSitemap />} />
+
           <Route path="/" element={<Beranda />} />
           <Route path="/berita" element={<Berita />} />
           
-          {/* DIUBAH: Menggunakan :slug untuk URL ramah SEO */}
+          {/* Menggunakan :slug untuk URL ramah SEO */}
           <Route path="/berita/:slug" element={<DetailBerita />} />
 
           <Route path="/anggota" element={<Anggota />} />
