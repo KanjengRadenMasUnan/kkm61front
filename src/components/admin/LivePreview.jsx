@@ -1,7 +1,6 @@
 import { Sparkles, Calendar, User } from 'lucide-react'
 
 export default function LivePreview({ formData, setFormData, blocks, updateBlock, getSecureImageUrl }) {
-  // HELPER PARSER WEBP & RICH TEXT FORMAT
   const renderFormattedPreview = (text) => {
     if (!text) return ''
     let html = text
@@ -17,10 +16,20 @@ export default function LivePreview({ formData, setFormData, blocks, updateBlock
     return <span dangerouslySetInnerHTML={{ __html: html }} />
   }
 
+  // HELPER MENGATUR UKURAN FONT JUDUL DI LIVE PREVIEW
+  const getPreviewHeadingSizeClass = (size) => {
+    switch (size) {
+      case 'sm': return 'text-base sm:text-lg'
+      case 'lg': return 'text-xl sm:text-3xl'
+      case 'xl': return 'text-2xl sm:text-4xl'
+      case 'md':
+      default: return 'text-lg sm:text-2xl'
+    }
+  }
+
   return (
     <div className="hidden lg:block w-1/2 bg-cream p-6 overflow-y-auto space-y-4 border-l border-gold/20 min-h-screen">
       
-      {/* HEADER BAR PREVIEW */}
       <div className="flex items-center justify-between border-b border-gold/30 pb-3 sticky top-0 bg-cream/90 backdrop-blur-md z-10">
         <span className="text-xs font-bold text-gold uppercase tracking-wider bg-primary px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-xs">
           <Sparkles size={13} /> Live Preview Editorial
@@ -30,10 +39,8 @@ export default function LivePreview({ formData, setFormData, blocks, updateBlock
         </span>
       </div>
 
-      {/* KANVAS KONTEN BERITA */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gold/30 shadow-md space-y-5 font-body">
         
-        {/* METADATA KATEGORI & TANGGAL */}
         <div className="flex items-center gap-2">
           <span className="bg-gold text-primary text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wide">
             {formData.kategori || 'Kegiatan KKM'}
@@ -43,17 +50,16 @@ export default function LivePreview({ formData, setFormData, blocks, updateBlock
           </span>
         </div>
 
-        {/* JUDUL ARTIKEL */}
+        {/* JUDUL SESUAI UKURAN PILIHAN ADMIN */}
         <h1
           contentEditable
           suppressContentEditableWarning
           onBlur={(e) => setFormData({ ...formData, judul: e.target.innerText })}
-          className="text-xl sm:text-2xl font-bold font-display text-primary leading-snug hover:bg-gold/10 p-1.5 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50"
+          className={`font-bold font-display text-primary leading-snug hover:bg-gold/10 p-1.5 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-gold/50 ${getPreviewHeadingSizeClass(formData.ukuranJudul)}`}
         >
           {formData.judul || 'Judul Artikel Liputan...'}
         </h1>
 
-        {/* RINGKASAN / LEAD PARAGRAPH */}
         <p
           contentEditable
           suppressContentEditableWarning
@@ -63,7 +69,6 @@ export default function LivePreview({ formData, setFormData, blocks, updateBlock
           {formData.ringkasan || 'Tulis ringkasan singkat artikel di sini...'}
         </p>
 
-        {/* INFO PENULIS */}
         <div className="flex items-center gap-2.5 text-xs text-gray-500 border-t border-b border-gray-100 py-2.5">
           <div className="w-7 h-7 rounded-full bg-primary text-gold font-bold flex items-center justify-center text-[11px] shadow-2xs">
             <User size={13} />
@@ -71,7 +76,7 @@ export default function LivePreview({ formData, setFormData, blocks, updateBlock
           <span>Oleh: <strong className="text-primary font-semibold">{formData.penulis || 'Tim Humas KKM 61'}</strong></span>
         </div>
 
-        {/* PREVIEW COVER UTAMA: RASIO PRESISI 16:9 */}
+        {/* PREVIEW COVER UTAMA (RASIO 16:9) */}
         {formData.gambar ? (
           <div className="space-y-1.5 pt-1 w-full">
             <div className="w-full aspect-video rounded-2xl overflow-hidden border border-gold/20 shadow-xs bg-gray-100">
@@ -92,12 +97,11 @@ export default function LivePreview({ formData, setFormData, blocks, updateBlock
           </div>
         )}
 
-        {/* RENDER BLOK KONTEN (FOTO NARASI PAS MENYESUAIKAN UKURAN FOTONYA) */}
+        {/* RENDER BLOK KONTEN */}
         <div className="space-y-4 pt-3">
           {blocks.map((block) => (
             <div key={block.id} className="relative group">
               
-              {/* BLOK PARAGRAF */}
               {block.type === 'paragraph' && (
                 <p
                   contentEditable
@@ -109,7 +113,6 @@ export default function LivePreview({ formData, setFormData, blocks, updateBlock
                 </p>
               )}
 
-              {/* BLOK SUB-JUDUL */}
               {block.type === 'heading' && (
                 <h3
                   contentEditable
@@ -121,7 +124,6 @@ export default function LivePreview({ formData, setFormData, blocks, updateBlock
                 </h3>
               )}
 
-              {/* BLOK KUTIPAN */}
               {block.type === 'quote' && (
                 <blockquote
                   contentEditable
@@ -133,7 +135,6 @@ export default function LivePreview({ formData, setFormData, blocks, updateBlock
                 </blockquote>
               )}
 
-              {/* BLOK GAMBAR SISIPAN: PAS UKURAN FOTONYA (RATA TENGAH) */}
               {block.type === 'image' && (
                 <div className="my-5 flex flex-col items-center justify-center w-full">
                   {block.url ? (
@@ -162,7 +163,6 @@ export default function LivePreview({ formData, setFormData, blocks, updateBlock
           ))}
         </div>
 
-        {/* PREVIEW HASHTAGS */}
         {formData.tags && (
           <div className="pt-4 border-t border-gray-100 flex flex-wrap gap-1.5">
             <span className="text-[11px] font-bold text-gray-400 mr-1 flex items-center">Topik:</span>
