@@ -13,11 +13,10 @@ import {
   TrendingUp, 
   ChevronRight, 
   Sparkles,
-  Newspaper,
-  Camera
+  Newspaper
 } from 'lucide-react'
 
-// HELPER PARSER MARKDOWN
+// HELPER PARSER MARKDOWN (BOLD, ITALIC, LINK)
 const parseFormattedText = (text) => {
   if (!text) return ''
 
@@ -121,7 +120,6 @@ export default function DetailBerita() {
     return `${time} min baca`
   }
 
-  // HELPER UNTUK MENGATUR UKURAN FONT JUDUL
   const getHeadingSizeClass = (size) => {
     switch (size) {
       case 'sm':
@@ -176,6 +174,7 @@ export default function DetailBerita() {
           )
         }
 
+        {/* FOTO NARASI: CAPTION BERSIH SESUAI KETENTUAN UMUM PORTAL BERITA */}
         if (block.type === 'image') {
           return (
             <figure key={block.id || index} className="my-8 flex flex-col items-center justify-center w-full">
@@ -189,9 +188,8 @@ export default function DetailBerita() {
                 </div>
               ) : null}
               {block.caption && (
-                <figcaption className="inline-flex items-center gap-1.5 text-center text-xs sm:text-[13px] text-gray-600 italic mt-3 bg-gray-50/90 px-4 py-1.5 rounded-full border border-gray-200/60 shadow-2xs max-w-xl">
-                  <Camera size={13} className="text-gold shrink-0" />
-                  <span>{parseFormattedText(block.caption)}</span>
+                <figcaption className="text-center text-xs sm:text-[13px] text-gray-500 italic mt-2.5 max-w-2xl px-2">
+                  {parseFormattedText(block.caption)}
                 </figcaption>
               )}
             </figure>
@@ -349,7 +347,6 @@ export default function DetailBerita() {
           </span>
         </div>
 
-        {/* JUDUL DINAMIS SESUAI DENGAN UKURAN PILIHAN ADMIN */}
         <h1 className={`font-bold font-display text-primary leading-tight sm:leading-snug ${getHeadingSizeClass(berita.ukuranJudul || berita.ukuran_judul)}`}>
           {berita.judul}
         </h1>
@@ -419,9 +416,9 @@ export default function DetailBerita() {
         </div>
       </div>
 
-      {/* GAMBAR COVER UTAMA: FULL-WIDTH BANNER DENGAN RASIO 16:9 / 21:9 */}
+      {/* GAMBAR COVER UTAMA: CAPTION TEKS POLOS TANPA IKON/BOX */}
       {berita.gambar && (
-        <div className="w-full space-y-2.5 my-6">
+        <div className="w-full space-y-2 my-6">
           <div className="w-full aspect-[16/9] md:aspect-[21/9] rounded-2xl sm:rounded-3xl overflow-hidden border border-gold/20 shadow-xl bg-gray-900/10">
             <img 
               src={secureCoverImage} 
@@ -429,10 +426,9 @@ export default function DetailBerita() {
               className="w-full h-full object-cover block" 
             />
           </div>
-          <div className="flex items-center justify-center gap-1.5 text-[11px] sm:text-xs text-gray-500 italic">
-            <Camera size={13} className="text-gold" />
-            <span>Dokumentasi Liputan Utama: {berita.judul}</span>
-          </div>
+          <p className="text-center text-xs text-gray-500 italic">
+            Dokumentasi Liputan: {berita.judul}
+          </p>
         </div>
       )}
 
