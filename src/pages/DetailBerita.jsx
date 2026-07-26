@@ -121,7 +121,7 @@ export default function DetailBerita() {
     return `${time} min baca`
   }
 
-  // FUNGSI UTAMA: RENDER BLOK JSON KONTEN BERITA DENGAN FRAMING GAMBAR PROFESIONAL
+  // FUNGSI RENDER BLOK NARASI BERITA (FOTO NARASI PAS MENYESUAIKAN UKURAN FOTO)
   const renderKontenBerita = (isiContent) => {
     if (!isiContent) return <p className="text-gray-400 italic">Tidak ada isi berita.</p>
 
@@ -162,21 +162,19 @@ export default function DetailBerita() {
           )
         }
 
+        // FOTO NARASI: PAS MENYESUAIKAN UKURAN FOTONYA (RATA TENGAH & TIDAK DIPAKSA FULL)
         if (block.type === 'image') {
           return (
-            <figure key={block.id || index} className="my-8 space-y-2.5 max-w-4xl mx-auto">
+            <figure key={block.id || index} className="my-8 flex flex-col items-center justify-center w-full">
               {block.url ? (
-                /* KONTEN SISIPAN DENGAN BINGKAI EDITORIAL YANG RAPI */
-                <div className="w-full max-h-[480px] bg-slate-900/5 rounded-2xl border border-gray-200/80 p-1.5 sm:p-2 flex items-center justify-center overflow-hidden shadow-2xs">
-                  <img 
-                    src={getSecureImageUrl(block.url)} 
-                    alt={block.caption ? `${block.caption} - ${berita.judul}` : `Dokumentasi ${berita.judul}`} 
-                    className="w-full h-auto max-h-[460px] object-contain rounded-xl mx-auto block" 
-                  />
-                </div>
+                <img 
+                  src={getSecureImageUrl(block.url)} 
+                  alt={block.caption ? `${block.caption} - ${berita.judul}` : `Dokumentasi ${berita.judul}`} 
+                  className="max-w-full h-auto rounded-2xl border border-gray-200/80 shadow-xs mx-auto block" 
+                />
               ) : null}
               {block.caption && (
-                <figcaption className="text-center text-xs sm:text-[13px] text-gray-500 italic px-4 pt-0.5">
+                <figcaption className="text-center text-xs sm:text-[13px] text-gray-500 italic mt-2.5 max-w-xl px-4">
                   {parseFormattedText(block.caption)}
                 </figcaption>
               )}
@@ -404,14 +402,14 @@ export default function DetailBerita() {
         </div>
       </div>
 
-      {/* GAMBAR COVER UTAMA (STUDIO FRAMING & ZERO CROP ALA WEB BERITA PROFESIONAL) */}
+      {/* GAMBAR COVER UTAMA: FULL GAMBAR UTUH MEMBENTANG LEBAR (FULL COVER) */}
       {berita.gambar && (
-        <div className="space-y-2 max-w-5xl mx-auto">
-          <div className="w-full max-h-[520px] bg-slate-900/5 rounded-2xl sm:rounded-3xl border border-gray-200/80 shadow-sm flex items-center justify-center overflow-hidden p-1.5 sm:p-2">
+        <div className="space-y-2.5 max-w-5xl mx-auto w-full">
+          <div className="w-full rounded-3xl overflow-hidden border border-gold/20 shadow-md">
             <img 
               src={secureCoverImage} 
               alt={`Foto Cover Liputan: ${berita.judul} - KKM 61 Desa Waringinkurung`} 
-              className="w-full h-auto max-h-[500px] object-contain rounded-xl sm:rounded-2xl mx-auto block" 
+              className="w-full h-auto block rounded-3xl" 
             />
           </div>
           <p className="text-[11px] sm:text-xs text-gray-500 italic text-center px-4">
