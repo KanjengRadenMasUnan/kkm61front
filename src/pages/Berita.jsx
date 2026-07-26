@@ -4,7 +4,6 @@ import { API_BASE_URL } from '../config'
 import { Calendar, ArrowRight, Flame, Megaphone, TrendingUp, Filter, Layers, Search, ChevronRight } from 'lucide-react'
 import logoKkm from '../assets/logo-kkm.png'
 
-// Variabel memori cache sederhana di luar komponen agar tersimpan selama aplikasi berjalan
 let cachedBeritaData = null
 
 export default function Berita() {
@@ -13,7 +12,6 @@ export default function Berita() {
   const [activeCategory, setActiveCategory] = useState('Semua')
   const [search, setSearch] = useState('')
 
-  // HELPER PEMBERSIH & KONVERSI OTOMATIS CLOUDINARY KE WEBP
   const getSecureImageUrl = (url) => {
     if (!url) return 'https://kkm61waringinkurungnews.my.id/logo-kkm.png'
 
@@ -32,7 +30,6 @@ export default function Berita() {
       cleanUrl = `${backendDomain}${cleanUrl}`.replace('http://', 'https://')
     }
 
-    // Transformasi Otomatis Cloudinary ke WebP & Kompresi Optimal
     if (cleanUrl.includes('cloudinary.com') && cleanUrl.includes('/upload/') && !cleanUrl.includes('/f_auto,q_auto/')) {
       cleanUrl = cleanUrl.replace('/upload/', '/upload/f_auto,q_auto/')
     }
@@ -83,16 +80,16 @@ export default function Berita() {
   })
 
   return (
-    <div className="space-y-6 sm:space-y-8 pb-12 font-body max-w-7xl mx-auto min-h-screen">
+    <div className="space-y-4 sm:space-y-8 pb-12 font-body max-w-7xl mx-auto min-h-screen px-3 sm:px-6 lg:px-8">
       
-      {/* 1. RUNNING TEXT TICKER */}
-      <div className="bg-primary text-cream rounded-2xl p-2.5 px-3 sm:px-4 flex items-center gap-2 sm:gap-3 border border-gold/30 shadow-md overflow-hidden text-xs">
-        <div className="flex items-center gap-1 bg-gold text-primary font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl shrink-0 uppercase tracking-wider text-[9px] sm:text-[10px]">
-          <Megaphone size={12} />
+      {/* 1. RUNNING TEXT TICKER (MINIMALIS DI HP) */}
+      <div className="bg-primary text-cream rounded-xl sm:rounded-2xl p-2 px-3 sm:px-4 flex items-center gap-2 sm:gap-3 border border-gold/30 shadow-sm overflow-hidden text-xs">
+        <div className="flex items-center gap-1 bg-gold text-primary font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg sm:rounded-xl shrink-0 uppercase tracking-wider text-[9px] sm:text-[10px]">
+          <Megaphone size={11} />
           <span>Terkini</span>
         </div>
         <div className="overflow-hidden whitespace-nowrap w-full">
-          <div className="inline-block animate-marquee font-medium text-cream/90 text-xs">
+          <div className="inline-block animate-marquee font-medium text-cream/90 text-[11px] sm:text-xs">
             {listBerita.length > 0 ? (
               listBerita.map((b) => `• ${b.judul} (${b.tanggal}) `).join('    ')
             ) : (
@@ -103,28 +100,29 @@ export default function Berita() {
       </div>
 
       {/* 2. HEADLINE NEWS GRID */}
-      <section className="space-y-4">
-        <div className="flex items-center gap-2 text-primary font-bold text-base sm:text-lg border-b-2 border-gold/40 pb-2">
-          <Flame className="text-gold shrink-0" size={20} />
+      <section className="space-y-3 sm:space-y-4">
+        <div className="flex items-center gap-2 text-primary font-bold text-sm sm:text-lg border-b-2 border-gold/40 pb-1.5 sm:pb-2">
+          <Flame className="text-gold shrink-0" size={18} />
           <h2>Berita Utama Hari Ini</h2>
         </div>
 
         {loading && listBerita.length === 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 animate-pulse">
-            <div className="lg:col-span-7 h-[320px] sm:h-[420px] bg-gray-200 rounded-3xl"></div>
-            <div className="lg:col-span-5 flex flex-col gap-4">
+            <div className="lg:col-span-7 h-[220px] sm:h-[420px] bg-gray-200 rounded-2xl sm:rounded-3xl"></div>
+            <div className="hidden sm:flex lg:col-span-5 flex-col gap-4">
               <div className="h-[150px] sm:h-[200px] bg-gray-200 rounded-3xl"></div>
               <div className="h-[150px] sm:h-[200px] bg-gray-200 rounded-3xl"></div>
             </div>
           </div>
         ) : listBerita.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-stretch">
-            {/* BERITA UTAMA BESAR */}
+            
+            {/* BERITA UTAMA BESAR (ANDROID COMPACT / PC FULL) */}
             {beritaUtama && (
               <div className="lg:col-span-7">
                 <Link
                   to={`/berita/${beritaUtama.slug || beritaUtama.id}`}
-                  className="group relative h-[320px] sm:h-[420px] rounded-3xl overflow-hidden border border-gold/30 shadow-lg flex flex-col justify-end p-4 sm:p-6 transition-all duration-300 block"
+                  className="group relative h-[240px] sm:h-[420px] rounded-2xl sm:rounded-3xl overflow-hidden border border-gold/30 shadow-md sm:shadow-lg flex flex-col justify-end p-3.5 sm:p-6 transition-all duration-300 block"
                 >
                   {beritaUtama.gambar ? (
                     <img
@@ -139,36 +137,37 @@ export default function Berita() {
 
                   <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/60 to-transparent" />
 
-                  <div className="relative z-10 space-y-1.5 sm:space-y-2">
-                    <span className="inline-flex items-center gap-1 bg-gold text-primary text-[9px] sm:text-[10px] font-bold px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full shadow-md font-body uppercase">
-                      <Calendar size={10} />
+                  <div className="relative z-10 space-y-1 sm:space-y-2">
+                    <span className="inline-flex items-center gap-1 bg-gold text-primary text-[8px] sm:text-[10px] font-bold px-2 py-0.5 sm:px-3 sm:py-1 rounded-full shadow-md uppercase">
+                      <Calendar size={9} />
                       {beritaUtama.tanggal}
                     </span>
 
-                    <h1 className="font-body font-bold text-cream text-lg sm:text-2xl leading-snug group-hover:text-gold transition-colors line-clamp-2">
+                    <h1 className="font-bold text-cream text-base sm:text-2xl leading-snug group-hover:text-gold transition-colors line-clamp-2">
                       {beritaUtama.judul}
                     </h1>
 
-                    <p className="text-xs sm:text-sm text-cream/80 font-body line-clamp-2 leading-relaxed">
+                    {/* Ringkasan Disembunyikan di Android agar hemat ruang */}
+                    <p className="hidden sm:block text-xs sm:text-sm text-cream/80 line-clamp-2 leading-relaxed">
                       {beritaUtama.ringkasan}
                     </p>
 
-                    <div className="pt-1 sm:pt-2 flex items-center gap-1 text-gold text-xs font-bold group-hover:translate-x-1 transition-transform">
+                    <div className="pt-0.5 sm:pt-2 flex items-center gap-1 text-gold text-[11px] sm:text-xs font-bold group-hover:translate-x-1 transition-transform">
                       <span>Baca Selengkapnya</span>
-                      <ArrowRight size={14} />
+                      <ArrowRight size={13} />
                     </div>
                   </div>
                 </Link>
               </div>
             )}
 
-            {/* SUB-HEADLINE BERITA */}
-            <div className="lg:col-span-5 flex flex-col justify-between gap-4">
+            {/* SUB-HEADLINE BERITA (DI TAMPILAN PC SAJA, DI ANDROID DISEMBUNYIKAN AGAR TIDAK ANIK/PENUH) */}
+            <div className="hidden lg:flex lg:col-span-5 flex-col justify-between gap-4">
               {beritaSamping.map((item) => (
                 <Link
                   key={item.id}
                   to={`/berita/${item.slug || item.id}`}
-                  className="group relative flex-1 min-h-[160px] sm:min-h-[180px] rounded-3xl overflow-hidden border border-gold/30 shadow-md flex flex-col justify-end p-4 sm:p-5 transition-all duration-300 block"
+                  className="group relative flex-1 min-h-[180px] rounded-3xl overflow-hidden border border-gold/30 shadow-md flex flex-col justify-end p-5 transition-all duration-300 block"
                 >
                   {item.gambar ? (
                     <img
@@ -188,11 +187,11 @@ export default function Berita() {
                       <Calendar size={10} /> {item.tanggal}
                     </span>
 
-                    <h3 className="font-body font-bold text-cream text-sm sm:text-base leading-snug group-hover:text-gold transition-colors line-clamp-2">
+                    <h3 className="font-bold text-cream text-base leading-snug group-hover:text-gold transition-colors line-clamp-2">
                       {item.judul}
                     </h3>
 
-                    <p className="text-[10px] sm:text-[11px] text-cream/80 font-body line-clamp-1">
+                    <p className="text-[11px] text-cream/80 line-clamp-1">
                       {item.ringkasan}
                     </p>
                   </div>
@@ -203,32 +202,32 @@ export default function Berita() {
         )}
       </section>
 
-      {/* 3. SEARCH & KATEGORI FILTER BAR */}
-      <section className="bg-white p-3 sm:p-4 rounded-2xl border border-gold/20 shadow-sm flex flex-col sm:flex-row gap-3 items-center justify-between">
+      {/* 3. SEARCH & KATEGORI FILTER BAR (MINIMALIS MOBIL FEED) */}
+      <section className="bg-white p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-gold/20 shadow-xs flex flex-col sm:flex-row gap-2.5 sm:gap-3 items-center justify-between">
         <div className="relative w-full sm:w-72">
-          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            placeholder="Cari kata kunci berita..."
+            placeholder="Cari berita..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-gold"
+            className="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg sm:rounded-xl text-xs focus:outline-none focus:border-gold bg-gray-50/50 sm:bg-white"
           />
         </div>
 
-        <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto no-scrollbar">
-          <div className="flex items-center gap-1 text-xs font-bold text-primary px-2 border-r border-gold/20 shrink-0">
+        <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto no-scrollbar pb-0.5 sm:pb-0">
+          <div className="hidden sm:flex items-center gap-1 text-xs font-bold text-primary px-2 border-r border-gold/20 shrink-0">
             <Filter size={13} className="text-gold" />
             <span>Kategori:</span>
           </div>
-          <div className="flex gap-1.5">
+          <div className="flex gap-1.5 w-full sm:w-auto">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                className={`px-3 py-1 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-semibold whitespace-nowrap transition-all ${
                   activeCategory === cat
-                    ? 'bg-primary text-gold shadow-sm font-bold'
+                    ? 'bg-primary text-gold shadow-xs font-bold'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -240,37 +239,39 @@ export default function Berita() {
       </section>
 
       {/* 4. UTAMA & SIDEBAR LAYOUT */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-start">
+        
         {/* KOLOM UTAMA DAFTAR BERITA */}
-        <div className="lg:col-span-8 space-y-4 sm:space-y-6">
-          <div className="flex justify-between items-center border-b-2 border-gold/20 pb-2 sm:pb-3">
-            <h3 className="font-body font-bold text-primary text-base sm:text-xl flex items-center gap-2">
-              <Layers size={18} className="text-gold" />
+        <div className="lg:col-span-8 space-y-3 sm:space-y-6">
+          <div className="flex justify-between items-center border-b border-gold/20 pb-1.5 sm:pb-3">
+            <h3 className="font-bold text-primary text-sm sm:text-xl flex items-center gap-1.5 sm:gap-2">
+              <Layers size={16} className="text-gold" />
               <span>Arsip Berita & Liputan</span>
             </h3>
-            <span className="text-[11px] sm:text-xs text-gray-500 font-medium">{beritaFiltered.length} Artikel</span>
+            <span className="text-[10px] sm:text-xs text-gray-500 font-medium">{beritaFiltered.length} Artikel</span>
           </div>
 
           {loading && listBerita.length === 0 ? (
-            <div className="space-y-4 animate-pulse">
+            <div className="space-y-3 sm:space-y-4 animate-pulse">
               {[1, 2, 3].map((n) => (
-                <div key={n} className="h-32 bg-gray-200 rounded-3xl"></div>
+                <div key={n} className="h-24 sm:h-32 bg-gray-200 rounded-2xl sm:rounded-3xl"></div>
               ))}
             </div>
           ) : beritaFiltered.length === 0 ? (
-            <div className="bg-white p-6 rounded-3xl border border-gold/20 text-center text-gray-500 text-xs sm:text-sm">
+            <div className="bg-white p-6 rounded-2xl border border-gold/20 text-center text-gray-500 text-xs sm:text-sm">
               Tidak ditemukan berita pada kategori / pencarian ini.
             </div>
           ) : (
-            <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-2.5 sm:space-y-4">
               {beritaFiltered.map((item) => (
                 <Link
                   key={item.id}
                   to={`/berita/${item.slug || item.id}`}
-                  className="group bg-white p-3.5 sm:p-4 rounded-3xl border border-gold/20 hover:border-gold shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row gap-3 sm:gap-4 items-center"
+                  className="group bg-white p-2.5 sm:p-4 rounded-2xl sm:rounded-3xl border border-gray-100 sm:border-gold/20 hover:border-gold shadow-xs sm:shadow-sm hover:shadow-md transition-all flex flex-row gap-3 items-center"
                 >
+                  {/* GAMBAR MINI KECIL DI HP */}
                   {item.gambar ? (
-                    <div className="w-full sm:w-44 h-40 sm:h-32 rounded-2xl overflow-hidden shrink-0 border border-gold/10">
+                    <div className="w-24 h-20 sm:w-44 sm:h-32 rounded-xl sm:rounded-2xl overflow-hidden shrink-0 border border-gray-100 sm:border-gold/10">
                       <img 
                         src={getSecureImageUrl(item.gambar)} 
                         alt={item.judul} 
@@ -279,26 +280,32 @@ export default function Berita() {
                       />
                     </div>
                   ) : (
-                    <div className="w-full sm:w-44 h-32 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
+                    <div className="w-24 h-20 sm:w-44 sm:h-32 rounded-xl sm:rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px] sm:text-xs shrink-0">
                       KKM 61
                     </div>
                   )}
 
-                  <div className="space-y-1.5 sm:space-y-2 flex-1 w-full">
-                    <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-gold font-bold">
-                      <Calendar size={11} />
-                      <span>{item.tanggal}</span>
+                  <div className="space-y-1 sm:space-y-2 flex-1 min-w-0">
+                    <div className="flex items-center justify-between text-[9px] sm:text-[11px] text-gold font-bold">
+                      <span className="flex items-center gap-1">
+                        <Calendar size={10} />
+                        {item.tanggal}
+                      </span>
+                      <span className="bg-gold/10 text-primary px-1.5 py-0.5 rounded text-[8px] sm:text-[9px] uppercase tracking-wide border border-gold/20 sm:hidden">
+                        {item.kategori || 'Berita'}
+                      </span>
                     </div>
 
-                    <h4 className="font-body font-bold text-primary text-base sm:text-lg group-hover:text-gold transition-colors leading-snug line-clamp-2">
+                    <h4 className="font-bold text-primary text-xs sm:text-lg group-hover:text-gold transition-colors leading-snug line-clamp-2">
                       {item.judul}
                     </h4>
 
-                    <p className="text-xs text-ink/70 font-body line-clamp-2 leading-relaxed">
+                    {/* Ringkasan disembunyikan di HP agar kartu tipis & rapi */}
+                    <p className="hidden sm:block text-xs text-ink/70 line-clamp-2 leading-relaxed">
                       {item.ringkasan}
                     </p>
 
-                    <div className="pt-1 flex items-center gap-1 text-primary text-xs font-bold group-hover:text-gold transition-colors">
+                    <div className="pt-0.5 hidden sm:flex items-center gap-1 text-primary text-xs font-bold group-hover:text-gold transition-colors">
                       <span>Selengkapnya</span>
                       <ChevronRight size={14} />
                     </div>
@@ -309,49 +316,51 @@ export default function Berita() {
           )}
         </div>
 
-        {/* SIDEBAR PORTAL BERITA */}
+        {/* SIDEBAR PORTAL BERITA (TAMPIL DI PC, TETAP RAPI) */}
         <div className="lg:col-span-4 space-y-6">
+          
           {/* WIDGET TERPOPULER */}
-          <div className="bg-white p-5 sm:p-6 rounded-3xl border border-gold/20 shadow-sm space-y-3 sm:space-y-4">
-            <div className="flex items-center gap-2 border-b pb-3 border-gold/20 text-primary font-bold text-sm sm:text-base">
-              <TrendingUp className="text-gold" size={18} />
+          <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gold/20 shadow-xs sm:shadow-sm space-y-3 sm:space-y-4">
+            <div className="flex items-center gap-2 border-b pb-2.5 sm:pb-3 border-gold/20 text-primary font-bold text-xs sm:text-base">
+              <TrendingUp className="text-gold" size={16} />
               <h3>Terpopuler & Trending</h3>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2.5 sm:space-y-3">
               {beritaPopuler.map((pop, idx) => (
                 <Link
                   key={pop.id}
                   to={`/berita/${pop.slug || pop.id}`}
-                  className="flex items-start gap-3 group border-b border-gray-100 pb-2.5 last:border-none last:pb-0"
+                  className="flex items-start gap-2.5 sm:gap-3 group border-b border-gray-100 pb-2 sm:pb-2.5 last:border-none last:pb-0"
                 >
-                  <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gold/20 text-primary font-bold text-xs flex items-center justify-center shrink-0">
+                  <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gold/20 text-primary font-bold text-[10px] sm:text-xs flex items-center justify-center shrink-0 mt-0.5">
                     {idx + 1}
                   </span>
-                  <div>
-                    <h5 className="font-body font-semibold text-primary text-xs group-hover:text-gold transition-colors line-clamp-2 leading-snug">
+                  <div className="min-w-0">
+                    <h5 className="font-semibold text-primary text-xs group-hover:text-gold transition-colors line-clamp-2 leading-snug">
                       {pop.judul}
                     </h5>
-                    <span className="text-[10px] text-gray-400 block mt-0.5">{pop.tanggal}</span>
+                    <span className="text-[9px] sm:text-[10px] text-gray-400 block mt-0.5">{pop.tanggal}</span>
                   </div>
                 </Link>
               ))}
             </div>
           </div>
 
-          {/* WIDGET PROFIL KELOMPOK */}
-          <div className="bg-gradient-to-br from-primary via-[#163359] to-primary text-cream p-5 sm:p-6 rounded-3xl border border-gold/30 shadow-md space-y-3 text-center">
+          {/* WIDGET PROFIL KELOMPOK (DISEMBUNYIKAN DI MOBILE UNTUK MEMINIMALISIR HALAMAN) */}
+          <div className="hidden sm:block bg-gradient-to-br from-primary via-[#163359] to-primary text-cream p-5 sm:p-6 rounded-3xl border border-gold/30 shadow-md space-y-3 text-center">
             <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/10 rounded-2xl p-2 flex items-center justify-center mx-auto border border-gold/30 backdrop-blur-sm">
               <img src={logoKkm} alt="Logo KKM 61" className="w-full h-full object-contain" />
             </div>
-            <h4 className="font-body font-bold text-sm sm:text-base text-cream">KKM Kelompok 61</h4>
-            <p className="text-xs text-cream/80 font-body leading-relaxed">
+            <h4 className="font-bold text-sm sm:text-base text-cream">KKM Kelompok 61</h4>
+            <p className="text-xs text-cream/80 leading-relaxed">
               Kuliah Kerja Mahasiswa Universitas Bina Bangsa. Mengabdi dengan aksi nyata di masyarakat.
             </p>
             <Link to="/anggota" className="inline-block mt-2 text-xs font-bold bg-gold text-primary px-4 py-2 rounded-xl hover:bg-cream transition-colors">
               Lihat Struktur Tim
             </Link>
           </div>
+
         </div>
       </div>
     </div>
