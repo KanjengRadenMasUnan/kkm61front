@@ -16,6 +16,23 @@ import {
   Newspaper
 } from 'lucide-react'
 
+// HELPER PARSER MARKDOWN (MENGONVERSI **bold**, *italic*, DAN LINK KE HTML)
+const parseFormattedText = (text) => {
+  if (!text) return ''
+
+  // 1. Convert **bold** -> <strong>bold</strong>
+  let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+
+  // 2. Convert *italic* atau _italic_ -> <em>italic</em>
+  formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>')
+  formatted = formatted.replace(/_(.*?)_/g, '<em>$1</em>')
+
+  // 3. Convert [text](url) -> <a href="url">text</a>
+  formatted = formatted.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-primary font-bold underline hover:text-gold transition-colors">$1</a>')
+
+  return <span dangerouslySetInnerHTML={{ __html: formatted }} />
+}
+
 export default function DetailBerita() {
   const { slug, id: paramId } = useParams()
   const identifier = slug || paramId
@@ -47,7 +64,6 @@ export default function DetailBerita() {
       cleanUrl = `${backendDomain}${cleanUrl}`.replace('http://', 'https://')
     }
 
-    // Transformasi Otomatis Cloudinary ke WebP & Kompresi Optimal
     if (cleanUrl.includes('cloudinary.com') && cleanUrl.includes('/upload/') && !cleanUrl.includes('/f_auto,q_auto/')) {
       cleanUrl = cleanUrl.replace('/upload/', '/upload/f_auto,q_auto/')
     }
@@ -130,7 +146,7 @@ export default function DetailBerita() {
         if (block.type === 'paragraph') {
           return (
             <p key={block.id || index} className="leading-relaxed text-ink/90">
-              {block.content}
+              {parseFormattedText(block.content)}
             </p>
           )
         }
@@ -138,7 +154,7 @@ export default function DetailBerita() {
         if (block.type === 'heading') {
           return (
             <h3 key={block.id || index} className="text-lg sm:text-xl font-bold font-display text-primary pt-3 pb-1">
-              {block.content}
+              {parseFormattedText(block.content)}
             </h3>
           )
         }
@@ -146,7 +162,7 @@ export default function DetailBerita() {
         if (block.type === 'quote') {
           return (
             <blockquote key={block.id || index} className="border-l-4 border-gold bg-gold/5 p-4 rounded-r-2xl italic text-primary font-semibold my-4 text-sm sm:text-base">
-              "{block.content}"
+              "{parseFormattedText(block.content)}"
             </blockquote>
           )
         }
@@ -165,7 +181,7 @@ export default function DetailBerita() {
               ) : null}
               {block.caption && (
                 <figcaption className="text-center text-xs text-gray-500 italic">
-                  {block.caption}
+                  {parseFormattedText(block.caption)}
                 </figcaption>
               )}
             </figure>
@@ -178,7 +194,7 @@ export default function DetailBerita() {
 
     return (
       <div className="whitespace-pre-line leading-relaxed text-ink/90">
-        {isiContent}
+        {parseFormattedText(isiContent)}
       </div>
     )
   }
@@ -212,7 +228,6 @@ export default function DetailBerita() {
   const secureCoverImage = getSecureImageUrl(berita.gambar)
   const metaKeywords = berita.tags || `${berita.kategori}, KKM 61, Waringinkurung, UNIBA 2026, Kabupaten Serang`
 
-  // 1. Schema NewsArticle
   const newsArticleSchema = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
@@ -236,7 +251,6 @@ export default function DetailBerita() {
     "description": berita.ringkasan
   }
 
-  // 2. Schema BreadcrumbList
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -265,14 +279,12 @@ export default function DetailBerita() {
   return (
     <article className="animate-fade-in-up space-y-8 font-body max-w-7xl mx-auto pb-16">
       
-      {/* INJEKSI SEO META TAGS, NEWSARTICLE & BREADCRUMB SCHEMA */}
       <Helmet>
         <title>{`${berita.judul} - KKM 61 Waringinkurung News`}</title>
         <meta name="description" content={berita.ringkasan} />
         <meta name="keywords" content={metaKeywords} />
         <link rel="canonical" href={currentUrl} />
 
-        {/* Open Graph Meta / Facebook / WhatsApp */}
         <meta property="og:type" content="article" />
         <meta property="og:title" content={berita.judul} />
         <meta property="og:description" content={berita.ringkasan} />
@@ -283,18 +295,15 @@ export default function DetailBerita() {
         <meta property="og:url" content={currentUrl} />
         <meta property="og:site_name" content="KKM 61 Waringinkurung News" />
 
-        {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={berita.judul} />
         <meta name="twitter:description" content={berita.ringkasan} />
         <meta name="twitter:image" content={secureCoverImage} />
 
-        {/* JSON-LD Schema NewsArticle */}
         <script type="application/ld+json">
           {JSON.stringify(newsArticleSchema)}
         </script>
 
-        {/* JSON-LD Schema BreadcrumbList */}
         <script type="application/ld+json">
           {JSON.stringify(breadcrumbSchema)}
         </script>
@@ -335,7 +344,7 @@ export default function DetailBerita() {
         </h1>
 
         <p className="text-sm sm:text-lg text-ink/80 font-medium leading-relaxed border-l-4 border-gold pl-4 py-1 bg-gold/5 rounded-r-2xl">
-          {berita.ringkasan}
+          {parseFormattedText(berita.ringkasan)}
         </p>
 
         {/* METADATA PENULIS */}
@@ -419,7 +428,7 @@ export default function DetailBerita() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         <div className="lg:col-span-8 bg-white p-6 sm:p-10 rounded-3xl border border-gold/20 shadow-sm space-y-6">
           
-          {/* HASIL DEKODE RENDER KONTEN BERITA */}
+          {/* HASIL DEKODE RENDER KONTEN BERITA WITH MARKDOWN PARSER */}
           <div
             className={`font-body text-ink/90 leading-relaxed space-y-4 ${
               fontSize === 'sm' ? 'text-xs sm:text-sm' : fontSize === 'lg' ? 'text-base sm:text-xl' : 'text-sm sm:text-base'
@@ -448,7 +457,6 @@ export default function DetailBerita() {
         {/* SIDEBAR REKOMENDASI */}
         <div className="lg:col-span-4 space-y-6">
           
-          {/* TERKINI & REKOMENDASI */}
           <div className="bg-white p-5 sm:p-6 rounded-3xl border border-gold/20 shadow-sm space-y-4">
             <div className="flex items-center justify-between border-b border-gold/20 pb-3 text-primary font-bold text-sm sm:text-base">
               <div className="flex items-center gap-2">
@@ -491,7 +499,6 @@ export default function DetailBerita() {
             </div>
           </div>
 
-          {/* BERITA LAINNYA DI WEBSITE */}
           <div className="bg-white p-5 sm:p-6 rounded-3xl border border-gold/20 shadow-sm space-y-4">
             <div className="flex items-center justify-between border-b border-gold/20 pb-3 text-primary font-bold text-sm sm:text-base">
               <div className="flex items-center gap-2">
@@ -543,7 +550,6 @@ export default function DetailBerita() {
             </div>
           </div>
 
-          {/* HUBUNGI HUMAS */}
           <div className="bg-gradient-to-br from-primary via-[#163359] to-primary text-cream p-5 rounded-3xl border border-gold/30 shadow-md text-center space-y-3">
             <div className="w-10 h-10 bg-gold/20 text-gold rounded-xl flex items-center justify-center mx-auto border border-gold/30">
               <Sparkles size={18} />
