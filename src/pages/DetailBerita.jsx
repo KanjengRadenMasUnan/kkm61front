@@ -121,7 +121,7 @@ export default function DetailBerita() {
     return `${time} min baca`
   }
 
-  // FUNGSI RENDER BLOK NARASI BERITA (FOTO NARASI PAS MENYESUAIKAN UKURAN FOTO)
+  // FUNGSI RENDER BLOK NARASI BERITA (FOTO NARASI PAS MENYESUAIKAN UKURAN FOTONYA)
   const renderKontenBerita = (isiContent) => {
     if (!isiContent) return <p className="text-gray-400 italic">Tidak ada isi berita.</p>
 
@@ -162,7 +162,7 @@ export default function DetailBerita() {
           )
         }
 
-        // FOTO NARASI: PAS MENYESUAIKAN UKURAN FOTONYA (RATA TENGAH & TIDAK DIPAKSA FULL)
+        // FOTO NARASI: PAS MENYESUAIKAN UKURAN FOTONYA (RATA TENGAH)
         if (block.type === 'image') {
           return (
             <figure key={block.id || index} className="my-8 flex flex-col items-center justify-center w-full">
@@ -402,14 +402,14 @@ export default function DetailBerita() {
         </div>
       </div>
 
-      {/* GAMBAR COVER UTAMA: FULL GAMBAR UTUH MEMBENTANG LEBAR (FULL COVER) */}
+      {/* GAMBAR COVER UTAMA: RASIO PRESISI 16:9 */}
       {berita.gambar && (
         <div className="space-y-2.5 max-w-5xl mx-auto w-full">
-          <div className="w-full rounded-3xl overflow-hidden border border-gold/20 shadow-md">
+          <div className="w-full aspect-video rounded-3xl overflow-hidden border border-gold/20 shadow-md bg-gray-100">
             <img 
               src={secureCoverImage} 
               alt={`Foto Cover Liputan: ${berita.judul} - KKM 61 Desa Waringinkurung`} 
-              className="w-full h-auto block rounded-3xl" 
+              className="w-full h-full object-cover block" 
             />
           </div>
           <p className="text-[11px] sm:text-xs text-gray-500 italic text-center px-4">

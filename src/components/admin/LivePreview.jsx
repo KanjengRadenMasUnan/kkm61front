@@ -71,28 +71,28 @@ export default function LivePreview({ formData, setFormData, blocks, updateBlock
           <span>Oleh: <strong className="text-primary font-semibold">{formData.penulis || 'Tim Humas KKM 61'}</strong></span>
         </div>
 
-        {/* PREVIEW COVER UTAMA (TETAP FULL IMAGE TANPA DIPOTONG) */}
+        {/* PREVIEW COVER UTAMA: RASIO PRESISI 16:9 */}
         {formData.gambar ? (
-          <div className="space-y-1.5 pt-1">
-            <div className="w-full max-h-[400px] bg-slate-900/5 rounded-2xl border border-gold/20 p-1.5 flex items-center justify-center overflow-hidden shadow-xs">
+          <div className="space-y-1.5 pt-1 w-full">
+            <div className="w-full aspect-video rounded-2xl overflow-hidden border border-gold/20 shadow-xs bg-gray-100">
               <img 
                 src={getSecureImageUrl(formData.gambar)} 
                 alt="Preview Cover" 
-                className="w-full h-auto max-h-[380px] object-contain rounded-xl mx-auto block" 
+                className="w-full h-full object-cover block" 
               />
             </div>
             <p className="text-[11px] text-gray-400 italic text-center">
-              *Foto Cover Utama (Ditampilkan penuh tanpa terpotong)
+              *Foto Cover Utama (Rasio 16:9)
             </p>
           </div>
         ) : (
-          <div className="w-full h-40 rounded-2xl bg-primary/5 border-2 border-dashed border-primary/20 flex flex-col items-center justify-center text-primary font-semibold text-xs gap-1">
-            <span>🖼️ Area Gambar Cover Utama</span>
+          <div className="w-full aspect-video rounded-2xl bg-primary/5 border-2 border-dashed border-primary/20 flex flex-col items-center justify-center text-primary font-semibold text-xs gap-1">
+            <span>🖼️ Area Gambar Cover Utama (16:9)</span>
             <span className="text-[10px] text-gray-400 font-normal">Belum ada foto yang diunggah</span>
           </div>
         )}
 
-        {/* RENDER BLOK KONTEN (FOTO NARASI PAS UKURAN) */}
+        {/* RENDER BLOK KONTEN (FOTO NARASI PAS MENYESUAIKAN UKURAN FOTONYA) */}
         <div className="space-y-4 pt-3">
           {blocks.map((block) => (
             <div key={block.id} className="relative group">
@@ -133,14 +133,14 @@ export default function LivePreview({ formData, setFormData, blocks, updateBlock
                 </blockquote>
               )}
 
-              {/* BLOK GAMBAR SISIPAN: PAS UKURAN FOTO & RATA TENGAH */}
+              {/* BLOK GAMBAR SISIPAN: PAS UKURAN FOTONYA (RATA TENGAH) */}
               {block.type === 'image' && (
-                <div className="my-5 flex flex-col items-center justify-center bg-gray-50/60 p-3 rounded-2xl border border-gray-200/80">
+                <div className="my-5 flex flex-col items-center justify-center w-full">
                   {block.url ? (
                     <img 
                       src={getSecureImageUrl(block.url)} 
                       alt="Sisipan" 
-                      className="max-w-full h-auto max-h-[340px] object-contain rounded-xl shadow-xs mx-auto block border border-gray-200/50" 
+                      className="max-w-full h-auto rounded-xl shadow-xs mx-auto block border border-gray-200/80" 
                     />
                   ) : (
                     <div className="w-full h-28 rounded-xl bg-gray-200/70 border border-dashed border-gray-300 flex items-center justify-center text-gray-500 text-xs font-medium">
